@@ -125,11 +125,11 @@ class TreePredictor(RepresentablePredictor):
         model=None,
         seed=None,
     ) -> None:
-        assert method in [
+        assert method in {
             "QRX",
             "QuantileRegression",
             "QRF",
-        ], "method has to be either 'QRX', 'QuantileRegression', or 'QRF'"
+        }, "method has to be either 'QRX', 'QuantileRegression', or 'QRF'"
         self.method = method
         self.lead_time = lead_time
         self.context_length = (
@@ -170,7 +170,7 @@ class TreePredictor(RepresentablePredictor):
             " features for model training and prediction "
         )
 
-        self.model_params = model_params if model_params else {}
+        self.model_params = model_params or {}
         self.prediction_length = prediction_length
         self.freq = freq
         self.max_workers = max_workers
@@ -399,13 +399,14 @@ class TreePredictor(RepresentablePredictor):
         )
         num_feat_dynamic_real = self.preprocess_object.num_feat_dynamic_real
         num_feat_dynamic_cat = self.preprocess_object.num_feat_dynamic_cat
-        coordinate_map = {}
-        coordinate_map["target"] = (0, dynamic_length)
-        coordinate_map["feat_static_real"] = [
-            (dynamic_length + i, dynamic_length + i + 1)
-            for i in range(num_feat_static_real)
-        ]
-        coordinate_map["feat_static_cat"] = []
+        coordinate_map = {
+            "target": (0, dynamic_length),
+            "feat_static_real": [
+                (dynamic_length + i, dynamic_length + i + 1)
+                for i in range(num_feat_static_real)
+            ],
+            "feat_static_cat": [],
+        }
         static_cat_features_so_far = 0
         cardinality = (
             self.preprocess_object.cardinality
@@ -477,18 +478,16 @@ class TreePredictor(RepresentablePredictor):
         )
         logger.info(f"shape of importance matrix is: {importances.shape}")
         assert (
-            sum(
-                [
-                    sum([coor[1] - coor[0] for coor in coordinate_map[key]])
+            (
+                sum(
+                    sum(coor[1] - coor[0] for coor in coordinate_map[key])
                     for key in coordinate_map
                     if key != "target"
-                ]
+                )
+                + coordinate_map["target"][1]
             )
-            + coordinate_map["target"][1]
             - coordinate_map["target"][0]
-        ) == importances.shape[
-            0
-        ]  # Testing that we covered all of coordinates
+        ) == importances.shape[0]
 
         quantile_aggregated_importance_result = FeatureImportanceResult(
             target=np.expand_dims(

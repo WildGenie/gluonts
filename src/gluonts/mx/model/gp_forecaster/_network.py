@@ -144,7 +144,7 @@ class GaussianProcessNetworkBase(mx.gluon.HybridBlock):
             kernel_args = (
                 F.broadcast_mul(kernel_arg, scaling)
                 for kernel_arg, scaling in zip(
-                    kernel_args, scalings[0 : self.num_hyperparams]
+                    kernel_args, scalings[: self.num_hyperparams]
                 )
             )
         min_value = 1e-5

@@ -228,9 +228,8 @@ class NTA(IterationAveragingStrategy):
         """
 
         # If not triggered already due to epoch loss check fallback condition
-        if not self.averaging_started:
-            if epoch >= self.fallback_alpha_suffix:
-                self.averaging_started = True
+        if not self.averaging_started and epoch >= self.fallback_alpha_suffix:
+            self.averaging_started = True
 
         if not self.averaging_started and self.n > 0:
             min_len = self.n if self.last_n_trigger else (self.n + 1)
@@ -244,11 +243,10 @@ class NTA(IterationAveragingStrategy):
                     sliced_val_logs
                 ):
                     self.averaging_started = True
-            else:
-                if len(self.val_logs) >= min_len and metric > min(
+            elif len(self.val_logs) >= min_len and metric > min(
                     sliced_val_logs
                 ):
-                    self.averaging_started = True
+                self.averaging_started = True
             self.val_logs.append(metric)
 
 
@@ -298,9 +296,8 @@ class Alpha_Suffix(IterationAveragingStrategy):
         -------
         """
 
-        if not self.averaging_started:
-            if epoch >= self.alpha_suffix:
-                self.averaging_started = True
+        if not self.averaging_started and epoch >= self.alpha_suffix:
+            self.averaging_started = True
 
 
 class ModelIterationAveraging(Callback):

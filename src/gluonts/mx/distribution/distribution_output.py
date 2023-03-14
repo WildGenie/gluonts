@@ -137,9 +137,8 @@ class DistributionOutput(Output):
         """
         if loc is None and scale is None:
             return self.distr_cls(*distr_args)
-        else:
-            distr = self.distr_cls(*distr_args)
-            return AffineTransformedDistribution(distr, loc=loc, scale=scale)
+        distr = self.distr_cls(*distr_args)
+        return AffineTransformedDistribution(distr, loc=loc, scale=scale)
 
     @property
     def event_shape(self) -> Tuple:

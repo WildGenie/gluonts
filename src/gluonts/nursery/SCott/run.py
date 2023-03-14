@@ -193,7 +193,7 @@ torch.backends.cudnn.benchmark = False
 num_hidden_dimensions = None
 
 # get dataset
-with open("./dataset/" + args.data_file + ".csv", "rb") as input:
+with open(f"./dataset/{args.data_file}.csv", "rb") as input:
     data_package = pickle.load(input)
     freq = args.freq
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

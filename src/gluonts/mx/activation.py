@@ -38,7 +38,7 @@ def get_activation(activation: str, **kwargs) -> nn.HybridBlock:
         Activation object
 
     """
-    if activation in ["relu", "sigmoid", "softrelu", "softsign", "tanh"]:
+    if activation in {"relu", "sigmoid", "softrelu", "softsign", "tanh"}:
         return nn.Activation(activation=activation, **kwargs)
     if activation == "lrelu":
         return nn.LeakyReLU(alpha=0.2, **kwargs)

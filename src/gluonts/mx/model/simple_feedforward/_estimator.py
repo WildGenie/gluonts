@@ -155,7 +155,7 @@ class SimpleFeedForwardEstimator(GluonEstimator):
         self.num_hidden_dimensions = (
             num_hidden_dimensions
             if num_hidden_dimensions is not None
-            else list([40, 40])
+            else [40, 40]
         )
         self.prediction_length = prediction_length
         self.context_length = (
@@ -207,7 +207,7 @@ class SimpleFeedForwardEstimator(GluonEstimator):
         )
 
     def _create_instance_splitter(self, mode: str):
-        assert mode in ["training", "validation", "test"]
+        assert mode in {"training", "validation", "test"}
 
         instance_sampler = {
             "training": self.train_sampler,

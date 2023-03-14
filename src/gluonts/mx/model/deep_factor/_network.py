@@ -128,10 +128,9 @@ class DeepFactorTrainingNetwork(DeepFactorNetworkBase):
             F, feat_static_cat, past_time_feat
         )
 
-        loss = self.negative_normal_likelihood(
+        return self.negative_normal_likelihood(
             F, past_target.expand_dims(axis=2), fixed_effect, random_effect
         )
-        return loss
 
 
 class DeepFactorPredictionNetwork(DeepFactorNetworkBase):

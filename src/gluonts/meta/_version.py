@@ -151,20 +151,18 @@ def get_git_archive_version(fallback):
 
     if not refnames.startswith("$Format"):
         refs = refnames.split(", ")
-        tags = [
+        if tags := [
             ref.split("tag: ")[1] for ref in refs if ref.startswith("tag:")
-        ]
-
-        # if there is a tag, we return the first one
-        if tags:
+        ]:
             return tags[0]
 
     commit_hash = "$Format:%h$"
 
-    if not commit_hash.startswith("$Format"):
-        return f"{fallback}+g{commit_hash}"
-
-    return None
+    return (
+        None
+        if commit_hash.startswith("$Format")
+        else f"{fallback}+g{commit_hash}"
+    )
 
 
 def get_git_version(fallback):
@@ -198,7 +196,7 @@ def get_git_version(fallback):
         # If there is no git-tag, we have to fallback.
         release = fallback
         is_dev = False
-        labels = ["g" + repo.head_commit()]
+        labels = [f"g{repo.head_commit()}"]
 
     if not repo.clean():
         labels.append("dirty")

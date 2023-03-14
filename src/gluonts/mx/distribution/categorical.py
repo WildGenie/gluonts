@@ -77,8 +77,7 @@ class Categorical(Distribution):
     def log_prob(self, x):
         F = self.F
         mask = F.one_hot(x, self.num_cats)
-        log_prob = F.broadcast_mul(self.log_probs, mask).sum(axis=-1)
-        return log_prob
+        return F.broadcast_mul(self.log_probs, mask).sum(axis=-1)
 
     def sample(self, num_samples=None, dtype=np.int32):
         def s(bin_probs):
@@ -111,14 +110,12 @@ class CategoricalOutput(DistributionOutput):
     def domain_map(self, F, probs):
         if not mx.autograd.is_training():
             probs = probs / self.temperature
-        log_probs_s = F.log_softmax(probs)
-        return log_probs_s
+        return F.log_softmax(probs)
 
     def distribution(
         self, distr_args, loc=None, scale=None, **kwargs
     ) -> Distribution:
-        distr = Categorical(distr_args)
-        return distr
+        return Categorical(distr_args)
 
     @property
     def event_shape(self) -> Tuple:

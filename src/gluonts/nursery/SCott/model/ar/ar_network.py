@@ -30,8 +30,7 @@ class ARNetworkBase(nn.Module):
         # self.criterion = nn.MSELoss(reduction='none')
         self.criterion = nn.SmoothL1Loss(reduction="none")
 
-        modules = []
-        modules.append(nn.Linear(context_length, prediction_length))
+        modules = [nn.Linear(context_length, prediction_length)]
         self.linear = nn.Sequential(*modules)
 
 
@@ -48,8 +47,7 @@ class ARTrainingNetwork(ARNetworkBase):
         past_target /= 1 + nu
         future_target /= 1 + nu
         prediction = self.linear(past_target)
-        loss = self.criterion(prediction, future_target)
-        return loss
+        return self.criterion(prediction, future_target)
 
 
 class ARPredictionNetwork(ARNetworkBase):

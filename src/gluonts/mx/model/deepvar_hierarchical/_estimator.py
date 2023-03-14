@@ -69,8 +69,7 @@ def constraint_mat(S: np.ndarray) -> np.ndarray:
     # The top `m_agg` rows of the matrix `S` give the aggregation constraint
     # matrix.
     S_agg = S[:m_agg, :]
-    A = np.hstack((np.eye(m_agg), -S_agg))
-    return A
+    return np.hstack((np.eye(m_agg), -S_agg))
 
 
 def null_space_projection_mat(A: np.ndarray) -> np.ndarray:

@@ -314,7 +314,7 @@ class MQCNNEstimator(ForkingSeq2SeqEstimator):
         ]
         # user defined arguments become implications
         for field in fields:
-            if field in params.keys():
+            if field in params:
                 is_params_field = (
                     params[field]
                     if type(params[field]) == bool

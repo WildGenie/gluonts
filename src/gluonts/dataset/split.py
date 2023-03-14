@@ -101,9 +101,7 @@ def periods_between(
         >>> periods_between(start, end)
         9
     """
-    if start > end:
-        return 0
-    return ((end - start).n // start.freq.n) + 1
+    return 0 if start > end else ((end - start).n // start.freq.n) + 1
 
 
 def to_positive_slice(slice_: slice, length: int) -> slice:
@@ -291,11 +289,10 @@ class OffsetSplitter(AbstractBaseSplitter):
             offset_ + prediction_length <= entry[FieldName.TARGET].shape[-1]
         ), "Not enough data to generate some of the windows; try splitting data at an earlier offset"
 
+        input_slice = slice(None, offset_)
         if offset_ + prediction_length:
-            input_slice = slice(None, offset_)
             label_slice = slice(offset_, offset_ + prediction_length)
         else:
-            input_slice = slice(None, offset_)
             label_slice = slice(offset_, None)
         return (
             slice_data_entry(

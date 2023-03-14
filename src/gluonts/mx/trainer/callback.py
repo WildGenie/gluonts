@@ -400,10 +400,7 @@ class TrainingTimeLimit(BaseModel, Callback):
         self._timer.start()
 
     def on_train_batch_end(self, training_network: nn.HybridBlock) -> bool:
-        if self.stop_within_epoch:
-            return self._timer.is_running()
-
-        return True
+        return self._timer.is_running() if self.stop_within_epoch else True
 
     def on_epoch_end(
         self,

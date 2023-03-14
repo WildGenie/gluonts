@@ -196,10 +196,7 @@ def check_type(token, ty, val):
     if isinstance(ty, str):
         return matches(token)
 
-    if isinstance(ty, list):
-        return any(map(matches, token))
-
-    return False
+    return any(map(matches, token)) if isinstance(ty, list) else False
 
 
 @dataclass
@@ -237,10 +234,7 @@ class Parser:
 
         self.stream.pop("PARAN_CLOSE", "]")
 
-        if len(dims) == 1:
-            return GetItem(obj, dims[0])
-        else:
-            return GetItem(obj, tuple(dims))
+        return GetItem(obj, dims[0]) if len(dims) == 1 else GetItem(obj, tuple(dims))
 
     def parse_dot(self, obj):
         self.stream.pop("DOT")
@@ -291,9 +285,8 @@ class Parser:
 def parse(x: Union[str, list]) -> Op:
     if isinstance(x, list):
         return Stack(list(map(parse, x)))
-    else:
-        ts = TokenStream.from_str(x)
-        return Parser(ts).parse_expr()
+    ts = TokenStream.from_str(x)
+    return Parser(ts).parse_expr()
 
 
 @dataclass
@@ -334,7 +327,7 @@ class Translator:
     ) -> "Translator":
         fields_ = {}
         if fields is not None:
-            fields_.update(fields)
+            fields_ |= fields
 
         fields_.update(kwargs_fields)
 
@@ -347,9 +340,7 @@ class Translator:
         else:
             result = dict(item)
 
-        result.update(
-            {name: field(item) for name, field in self.fields.items()}
-        )
+        result |= {name: field(item) for name, field in self.fields.items()}
 
         return result
 

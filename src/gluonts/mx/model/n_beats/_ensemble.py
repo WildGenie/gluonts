@@ -125,7 +125,6 @@ class NBEATSEnsemblePredictor(Predictor):
         num_predictors = parameters["num_predictors"]
         num_digits = len(str(num_predictors))
 
-        predictors = []
         # load all the predictors individually and also make sure not to load
         # anything else by mistake
         predictor_locations = [
@@ -133,12 +132,10 @@ class NBEATSEnsemblePredictor(Predictor):
             for index in range(num_predictors)
         ]
 
-        # deserialize predictors
-        for sub_dir in predictor_locations:
-            predictors.append(
-                RepresentableBlockPredictor.deserialize(path / sub_dir, ctx)
-            )
-
+        predictors = [
+            RepresentableBlockPredictor.deserialize(path / sub_dir, ctx)
+            for sub_dir in predictor_locations
+        ]
         return NBEATSEnsemblePredictor(
             prediction_length=parameters["prediction_length"],
             predictors=predictors,
@@ -159,12 +156,10 @@ class NBEATSEnsemblePredictor(Predictor):
                 "NBEATSEnsemblePredictor does not support sampling. "
                 "Therefore 'num_samples' will be ignored and set to 1."
             )
-        iterators = []
-
-        # create the iterators from the predictors
-        for predictor in self.predictors:
-            iterators.append(predictor.predict(dataset, num_samples=1))
-
+        iterators = [
+            predictor.predict(dataset, num_samples=1)
+            for predictor in self.predictors
+        ]
         # we always have to predict for one series in the dataset with
         # all models and return it as a 'SampleForecast' so that it is
         # clear that all these prediction concern the same series
@@ -192,9 +187,6 @@ class NBEATSEnsemblePredictor(Predictor):
                 output = np.median(output, axis=0, keepdims=True)
             elif self.aggregation_method == "mean":
                 output = np.mean(output, axis=0, keepdims=True)
-            else:  # "none": do not aggregate
-                pass
-
             # on order to avoid mypys complaints
             assert start_date is not None
 
@@ -227,13 +219,12 @@ class NBEATSEnsemblePredictor(Predictor):
             # error
             return False
 
-        for own_predictor, that_predictor in zip(
-            self.predictors, that.predictors
-        ):
-            if not own_predictor == that_predictor:
-                return False
-
-        return True
+        return all(
+            own_predictor == that_predictor
+            for own_predictor, that_predictor in zip(
+                self.predictors, that.predictors
+            )
+        )
 
 
 class NBEATSEnsembleEstimator(Estimator):
@@ -352,16 +343,11 @@ class NBEATSEnsembleEstimator(Estimator):
         self.prediction_length = prediction_length
 
         assert meta_loss_function is None or all(
-            [
-                loss_function in VALID_LOSS_FUNCTIONS
-                for loss_function in meta_loss_function
-            ]
-        ), (
-            "Each loss function has to be one of the following:"
-            f" {VALID_LOSS_FUNCTIONS}."
-        )
+            loss_function in VALID_LOSS_FUNCTIONS
+            for loss_function in meta_loss_function
+        ), f"Each loss function has to be one of the following: {VALID_LOSS_FUNCTIONS}."
         assert meta_context_length is None or all(
-            [context_length > 0 for context_length in meta_context_length]
+            context_length > 0 for context_length in meta_context_length
         ), "The value of each `context_length` should be > 0"
         assert (
             meta_bagging_size is None or meta_bagging_size > 0
@@ -395,32 +381,28 @@ class NBEATSEnsembleEstimator(Estimator):
         self.estimators = self._estimator_factory(**kwargs)
 
     def _estimator_factory(self, **kwargs):
-        estimators = []
-        for context_length, loss_function, init_id in product(
-            self.meta_context_length,
-            self.meta_loss_function,
-            list(range(self.meta_bagging_size)),
-        ):
-            # So far no use for the init_id, models are by default always
-            # randomly initialized
-            estimators.append(
-                NBEATSEstimator(
-                    freq=self.freq,
-                    prediction_length=self.prediction_length,
-                    context_length=context_length,
-                    trainer=copy.deepcopy(self.trainer),
-                    num_stacks=self.num_stacks,
-                    widths=self.widths,
-                    num_blocks=self.num_blocks,
-                    num_block_layers=self.num_block_layers,
-                    expansion_coefficient_lengths=self.expansion_coefficient_lengths,  # noqa: E501
-                    sharing=self.sharing,
-                    stack_types=self.stack_types,
-                    loss_function=loss_function,
-                    **kwargs,
-                )
+        return [
+            NBEATSEstimator(
+                freq=self.freq,
+                prediction_length=self.prediction_length,
+                context_length=context_length,
+                trainer=copy.deepcopy(self.trainer),
+                num_stacks=self.num_stacks,
+                widths=self.widths,
+                num_blocks=self.num_blocks,
+                num_block_layers=self.num_block_layers,
+                expansion_coefficient_lengths=self.expansion_coefficient_lengths,  # noqa: E501
+                sharing=self.sharing,
+                stack_types=self.stack_types,
+                loss_function=loss_function,
+                **kwargs,
             )
-        return estimators
+            for context_length, loss_function, init_id in product(
+                self.meta_context_length,
+                self.meta_loss_function,
+                list(range(self.meta_bagging_size)),
+            )
+        ]
 
     @classmethod
     def from_hyperparameters(

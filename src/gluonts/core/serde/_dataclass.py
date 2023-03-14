@@ -71,10 +71,7 @@ class Eventual(Generic[T]):
 # without mypy complaining. We achieve this by nominally deriving from Any
 # during type checking. Because it's not actually possible to derive from Any
 # in Python, we inherit from object during runtime instead.
-if TYPE_CHECKING:
-    AnyLike = Any
-else:
-    AnyLike = object
+AnyLike = Any if TYPE_CHECKING else object
 
 
 @dataclasses.dataclass

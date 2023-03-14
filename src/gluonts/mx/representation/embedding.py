@@ -46,11 +46,7 @@ class Embedding(Representation):
         super().__init__(*args, **kwargs)
         self.num_bins = num_bins
 
-        if size is None:
-            self.size = round(self.num_bins ** (1 / 4))
-        else:
-            self.size = size
-
+        self.size = round(self.num_bins ** (1 / 4)) if size is None else size
         self.embedding = nn.Embedding(
             input_dim=self.num_bins, output_dim=self.size
         )

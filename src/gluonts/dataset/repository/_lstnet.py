@@ -70,7 +70,7 @@ root = (
 datasets_info = {
     "exchange_rate": LstnetDataset(
         name="exchange_rate",
-        url=root + "exchange_rate/exchange_rate.txt.gz",
+        url=f"{root}exchange_rate/exchange_rate.txt.gz",
         num_series=8,
         num_time_steps=7588,
         prediction_length=30,
@@ -81,11 +81,7 @@ datasets_info = {
     ),
     "electricity": LstnetDataset(
         name="electricity",
-        url=root + "electricity/electricity.txt.gz",
-        # original dataset can be found at
-        # https://archive.ics.uci.edu/ml/datasets/ElectricityLoadDiagrams20112014#
-        # the aggregated ones that is used from LSTNet filters out from the
-        # initial 370 series the one with no data in 2011
+        url=f"{root}electricity/electricity.txt.gz",
         num_series=321,
         num_time_steps=26304,
         prediction_length=24,
@@ -96,10 +92,7 @@ datasets_info = {
     ),
     "traffic": LstnetDataset(
         name="traffic",
-        url=root + "traffic/traffic.txt.gz",
-        # note there are 963 in the original dataset from
-        # https://archive.ics.uci.edu/ml/datasets/PEMS-SF but only 862 in
-        # LSTNet
+        url=f"{root}traffic/traffic.txt.gz",
         num_series=862,
         num_time_steps=17544,
         prediction_length=24,
@@ -110,7 +103,7 @@ datasets_info = {
     ),
     "solar-energy": LstnetDataset(
         name="solar-energy",
-        url=root + "solar-energy/solar_AL.txt.gz",
+        url=f"{root}solar-energy/solar_AL.txt.gz",
         num_series=137,
         num_time_steps=52560,
         prediction_length=24,

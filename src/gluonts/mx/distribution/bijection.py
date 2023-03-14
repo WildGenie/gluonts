@@ -302,8 +302,7 @@ class _Softrelu(Bijection):
         A numerically stable computation of :math:`x = \log(e^y - 1)`
         """
         thresh = F.zeros_like(y) + 20.0
-        x = F.where(F.broadcast_greater(y, thresh), y, F.log(F.expm1(y)))
-        return x
+        return F.where(F.broadcast_greater(y, thresh), y, F.log(F.expm1(y)))
 
     def f(self, x: Tensor) -> Tensor:
         F = getF(x)

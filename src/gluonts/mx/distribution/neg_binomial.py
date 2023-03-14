@@ -66,14 +66,13 @@ class NegativeBinomial(Distribution):
         alphaInv = 1.0 / self.alpha
         alpha_times_mu = self.alpha * self.mu
         F = self.F
-        ll = (
+        return (
             x * F.log(alpha_times_mu / (1.0 + alpha_times_mu))
             - alphaInv * F.log1p(alpha_times_mu)
             + F.gammaln(x + alphaInv)
             - F.gammaln(x + 1.0)
             - F.gammaln(alphaInv)
         )
-        return ll
 
     @property
     def mean(self) -> Tensor:
@@ -123,10 +122,9 @@ class NegativeBinomialOutput(DistributionOutput):
         mu, alpha = distr_args
         if scale is None:
             return NegativeBinomial(mu, alpha)
-        else:
-            F = getF(mu)
-            mu = F.broadcast_mul(mu, scale)
-            return NegativeBinomial(mu, alpha, F)
+        F = getF(mu)
+        mu = F.broadcast_mul(mu, scale)
+        return NegativeBinomial(mu, alpha, F)
 
     @property
     def event_shape(self) -> Tuple:

@@ -84,9 +84,8 @@ def parse_attribute(v: ast.Attribute, path=()):
             "__kind__": "type",
             "class": ".".join((v.value.id, v.attr) + path),
         }
-    else:
-        assert isinstance(v.value, ast.Attribute)
-        return parse_attribute(v.value, (v.attr,) + path)
+    assert isinstance(v.value, ast.Attribute)
+    return parse_attribute(v.value, (v.attr,) + path)
 
 
 @parse_expr.register(ast.Name)

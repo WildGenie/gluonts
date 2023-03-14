@@ -149,14 +149,10 @@ def equals_default_impl(this: Any, that: Any) -> bool:
 
 @equals.register(list)
 def equals_list(this: list, that: list) -> bool:
-    if not len(this) == len(that):
+    if len(this) != len(that):
         return False
 
-    for x, y in zip(this, that):
-        if not equals(x, y):
-            return False
-
-    return True
+    return all(equals(x, y) for x, y in zip(this, that))
 
 
 @equals.register(dict)
@@ -164,7 +160,7 @@ def equals_dict(this: dict, that: dict) -> bool:
     this_keys = this.keys()
     that_keys = that.keys()
 
-    if not this_keys == that_keys:
+    if this_keys != that_keys:
         return False
 
     for name in this_keys:
@@ -337,7 +333,7 @@ def validated(base_model=None):
                 )
                 if name != "self"
             }
-            model = PydanticModel(**{**nmargs, **kwargs})
+            model = PydanticModel(**nmargs | kwargs)
 
             # merge nmargs, kwargs, and the model fields into a single dict
             all_args = {**nmargs, **kwargs, **model.__dict__}

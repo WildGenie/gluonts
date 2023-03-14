@@ -34,9 +34,7 @@ class MXContext:
         if isinstance(v, mx.Context):
             return v
 
-        m = re.search(r"^(?P<dev_type>cpu|gpu)(\((?P<dev_id>\d+)\))?$", v)
-
-        if m:
+        if m := re.search(r"^(?P<dev_type>cpu|gpu)(\((?P<dev_id>\d+)\))?$", v):
             return mx.Context(m["dev_type"], int(m["dev_id"] or 0))
         else:
             raise ValueError(

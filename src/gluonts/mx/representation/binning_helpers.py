@@ -23,22 +23,20 @@ import numpy as np
 # - https://github.com/numpy/numpy/issues/12282
 def ensure_binning_monotonicity(bin_centers: np.ndarray):
     for i in range(1, len(bin_centers)):
-        if bin_centers[i] < bin_centers[i - 1]:
-            bin_centers[i] = bin_centers[i - 1]
+        bin_centers[i] = max(bin_centers[i], bin_centers[i - 1])
     return bin_centers
 
 
 def bin_edges_from_bin_centers(bin_centers: np.ndarray):
     lower_edge = -np.inf
     upper_edge = np.inf
-    bin_edges = np.concatenate(
+    return np.concatenate(
         [
             [lower_edge],
             (bin_centers[1:] + bin_centers[:-1]) / 2.0,
             [upper_edge],
         ]
     )
-    return bin_edges
 
 
 class Digitize(mx.operator.CustomOp):
@@ -67,7 +65,7 @@ class DigitizeProp(mx.operator.CustomOpProp):
         data_shape = in_shapes[0]
         bin_shape = in_shapes[1]
         output_shape = data_shape
-        return (data_shape, bin_shape), (output_shape,), ()
+        return (output_shape, bin_shape), (output_shape,), ()
 
     def create_operator(self, ctx, in_shapes, in_dtypes):
         return Digitize()

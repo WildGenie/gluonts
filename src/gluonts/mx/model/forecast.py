@@ -78,11 +78,9 @@ class DistributionForecast(Forecast):
         """
         Forecast mean.
         """
-        if self._mean is not None:
-            return self._mean
-        else:
+        if self._mean is None:
             self._mean = self.distribution.mean.asnumpy()
-            return self._mean
+        return self._mean
 
     @property
     def mean_ts(self) -> pd.Series:
@@ -93,8 +91,7 @@ class DistributionForecast(Forecast):
 
     def quantile(self, level: Union[float, str]) -> np.ndarray:
         level = Quantile.parse(level).value
-        q = self.distribution.quantile(mx.nd.array([level])).asnumpy()[0]
-        return q
+        return self.distribution.quantile(mx.nd.array([level])).asnumpy()[0]
 
     def to_sample_forecast(self, num_samples: int = 200) -> SampleForecast:
         return SampleForecast(

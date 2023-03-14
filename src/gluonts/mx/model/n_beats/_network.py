@@ -58,8 +58,7 @@ def seasonality_model(
     sines = F.stack(
         *[F.sin(2 * np.pi * i * t) for i in range(num_coefficients)]
     )
-    S = F.concat(cosines, sines, dim=0)
-    return S
+    return F.concat(cosines, sines, dim=0)
 
 
 def trend_model(
@@ -75,8 +74,7 @@ def trend_model(
     t = linear_space(
         F, context_length, prediction_length, fwd_looking=is_forecast
     )
-    T = F.stack(*[t**i for i in range(num_coefficients)])
-    return T
+    return F.stack(*[t**i for i in range(num_coefficients)])
 
 
 class NBEATSBlock(mx.gluon.HybridBlock):
@@ -454,15 +452,11 @@ class NBEATSNetwork(mx.gluon.HybridBlock):
         self.num_block_layers = num_block_layers
         self.sharing = sharing
         self.expansion_coefficient_lengths = expansion_coefficient_lengths
-        self.stack_types = stack_types
         self.prediction_length = prediction_length
         self.context_length = context_length
 
-        if scale:
-            self.scaler = MeanScaler(keepdims=True)
-        else:
-            self.scaler = NOPScaler(keepdims=True)
-
+        self.stack_types = stack_types
+        self.scaler = MeanScaler(keepdims=True) if scale else NOPScaler(keepdims=True)
         with self.name_scope():
             self.net_blocks: List[NBEATSBlock] = []
 
@@ -476,9 +470,9 @@ class NBEATSNetwork(mx.gluon.HybridBlock):
                         else None
                     )
                     # only last one does not have backcast
-                    has_backcast = not (
-                        stack_id == num_stacks - 1
-                        and block_id == num_blocks[num_stacks - 1] - 1
+                    has_backcast = (
+                        stack_id != num_stacks - 1
+                        or block_id != num_blocks[num_stacks - 1] - 1
                     )
                     if self.stack_types[stack_id] == "G":
                         net_block = NBEATSGenericBlock(
@@ -570,12 +564,10 @@ class NBEATSNetwork(mx.gluon.HybridBlock):
             F.abs(future_target - forecast) * future_observed_values
         )
 
-        smape = (200 / self.prediction_length) * F.mean(
+        return (200 / self.prediction_length) * F.mean(
             (absolute_error * (1 - flag)) / (denominator + flag),
             axis=1,
         )
-
-        return smape
 
     def mape_loss(
         self,
@@ -599,12 +591,10 @@ class NBEATSNetwork(mx.gluon.HybridBlock):
             F.abs(future_target - forecast) * future_observed_values
         )
 
-        mape = (100 / self.prediction_length) * F.mean(
+        return (100 / self.prediction_length) * F.mean(
             (absolute_error * (1 - flag)) / (denominator + flag),
             axis=1,
         )
-
-        return mape
 
     def mase_loss(
         self,
@@ -636,11 +626,9 @@ class NBEATSNetwork(mx.gluon.HybridBlock):
             F.abs(future_target - forecast) * future_observed_values
         )
 
-        mase = (F.mean(absolute_error, axis=1) * (1 - flag)) / (
+        return (F.mean(absolute_error, axis=1) * (1 - flag)) / (
             seasonal_error + flag
         )
-
-        return mase
 
 
 class NBEATSTrainingNetwork(NBEATSNetwork):

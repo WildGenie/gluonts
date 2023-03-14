@@ -80,7 +80,7 @@ def stack(
     if isinstance(data[0], np.ndarray):
         data = mx.nd.array(data, dtype=dtype, ctx=ctx)
     elif isinstance(data[0], (list, tuple)):
-        return list(
+        return [
             stack(
                 t,
                 ctx=ctx,
@@ -89,7 +89,7 @@ def stack(
                 is_right_pad=is_right_pad,
             )
             for t in zip(*data)
-        )
+        ]
     return data
 
 

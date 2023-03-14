@@ -32,9 +32,7 @@ from gluonts.time_feature import (
 
 
 def _make_block_diagonal(blocks: List[Tensor]) -> Tensor:
-    assert (
-        len(blocks) > 0
-    ), "You need at least one tensor to make a block-diagonal tensor"
+    assert blocks, "You need at least one tensor to make a block-diagonal tensor"
 
     if len(blocks) == 1:
         return blocks[0]
@@ -81,14 +79,11 @@ def _make_2_block_diagonal(F, left: Tensor, right: Tensor) -> Tensor:
     # shape (batch_size, n, m)
     zeros_off_diag_tr = zeros_off_diag.swapaxes(2, 3)
 
-    # block diagonal: shape (batch_size, seq_length, m+n, m+n)
-    _block_diagonal = F.concat(
+    return F.concat(
         F.concat(left, zeros_off_diag, dim=3),
         F.concat(zeros_off_diag_tr, right, dim=3),
         dim=2,
     )
-
-    return _block_diagonal
 
 
 class ISSM:
@@ -280,9 +275,7 @@ class CompositeISSM(ISSM):
     ) -> None:
         super().__init__()
         self.seasonal_issms = seasonal_issms
-        self.nonseasonal_issm = (
-            LevelISSM() if add_trend is False else LevelTrendISSM()
-        )
+        self.nonseasonal_issm = LevelTrendISSM() if add_trend else LevelISSM()
 
     def latent_dim(self) -> int:
         return (

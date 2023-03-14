@@ -278,16 +278,13 @@ class NPTSPredictor(RepresentablePredictor):
             do_exp=self._is_exp_kernel(),
         )
 
-        # Generate forecasts
-        forecast = NPTS.predict(
+        return NPTS.predict(
             targets=ts,
             prediction_length=self.prediction_length,
             sampling_weights_iterator=sampling_weights_iterator,
             num_samples=num_samples,
             item_id=item_id,
         )
-
-        return forecast
 
     def _get_features(
         self,

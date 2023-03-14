@@ -83,8 +83,7 @@ class Dirichlet(Distribution):
         log_beta = F.sum(F.gammaln(alpha), axis=-1) - F.gammaln(sum_alpha)
 
         l_x = F.sum((alpha - 1) * F.log(x), axis=-1)
-        ll = l_x - log_beta
-        return ll
+        return l_x - log_beta
 
     @property
     def mean(self) -> Tensor:
@@ -144,13 +143,10 @@ class DirichletOutput(DistributionOutput):
         self.mask = None
 
     def distribution(self, distr_args, loc=None, scale=None) -> Distribution:
-        distr = Dirichlet(distr_args)
-        return distr
+        return Dirichlet(distr_args)
 
     def domain_map(self, F, alpha_vector):
-        # apply softplus to the elements of alpha vector
-        alpha = F.Activation(alpha_vector, act_type="softrelu")
-        return alpha
+        return F.Activation(alpha_vector, act_type="softrelu")
 
     @property
     def event_shape(self) -> Tuple:

@@ -72,11 +72,7 @@ class SAdam:
             output = (output * y).mean() * self.num_strata
         else:
             output = output.mean()
-        if isinstance(output, (list, tuple)):
-            loss = output[0]
-        else:
-            loss = output
-        return loss
+        return output[0] if isinstance(output, (list, tuple)) else output
 
     def __call__(
         self, net: nn.Module, input_names: List[str], data_loaders
@@ -91,7 +87,6 @@ class SAdam:
 
         timer = Timer()
 
-        training_iter = iter(data_loaders["training_data_loader"])
         anchor_iter = iter(data_loaders["anchor_data_loader"])
 
         group_ratio = (
@@ -100,6 +95,7 @@ class SAdam:
         avg_epoch_grad = 0.0
         v_0_norm = 0.0
         v_t_norm = 0.0
+        training_iter = iter(data_loaders["training_data_loader"])
         for epoch_no in range(self.epochs):
             if self.decreasing_step_size:
                 for param_group in optimizer.param_groups:
@@ -244,9 +240,5 @@ class SAdam:
 
         writer.close()
         print(
-            "task: "
-            + self.task_name
-            + " on SAdam with lr="
-            + str(self.learning_rate)
-            + " is done!"
+            f"task: {self.task_name} on SAdam with lr={str(self.learning_rate)} is done!"
         )

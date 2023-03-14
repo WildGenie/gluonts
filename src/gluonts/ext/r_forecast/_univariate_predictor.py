@@ -96,7 +96,7 @@ class RForecastPredictor(RBasePredictor):
             "frequency": self.period,
         }
         if params is not None:
-            self.params.update(params)
+            self.params |= params
 
     def _get_r_forecast(self, data: Dict, params: Dict) -> Dict:
         make_ts = self._stats_pkg.ts

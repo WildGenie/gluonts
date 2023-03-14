@@ -44,12 +44,4 @@ class WeightedSampler:
         # Samples from the Uniform distribution: U(0, `total_weight`)
         uniform_samples = total_weight * np.random.random(num_samples)
 
-        # Search for the last `ix` for each sample u ~ U(0, total weight)
-        # such that u <= `cumsum`[`ix`]
-        # This means `ix` is chosen with probability
-        # `cumsum`[`ix`] - `cumsum`[`ix` - 1] = weights[ix]
-        samples_ix = np.searchsorted(
-            cumsum_weights, uniform_samples, side="left"
-        )
-
-        return samples_ix
+        return np.searchsorted(cumsum_weights, uniform_samples, side="left")

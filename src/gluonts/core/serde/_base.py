@@ -334,7 +334,4 @@ def decode(r: Any) -> Any:
     if type(r) == dict:
         return valmap(decode, r)
 
-    if type(r) == list:
-        return list(map(decode, r))
-
-    return r
+    return list(map(decode, r)) if type(r) == list else r

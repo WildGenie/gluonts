@@ -45,11 +45,7 @@ def write(dataset, out, freq, type_, stream):
         else:
             raise click.UsageError(f"Unsupported suffix {out.suffix}.")
 
-    if type_ == "arrow":
-        writer = ArrowWriter(stream=stream)
-    else:
-        writer = ParquetWriter()
-
+    writer = ArrowWriter(stream=stream) if type_ == "arrow" else ParquetWriter()
     writer.write_to_file(tqdm(FileDataset(dataset, freq)), out)
 
 

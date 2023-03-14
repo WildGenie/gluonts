@@ -131,10 +131,10 @@ def prune_fcst_df(
     df: pd.DataFrame, base_reconciliation_model_name: str
 ) -> pd.DataFrame:
     # keep certain columns
-    columns_to_keep = ["ds"]
-    columns_to_keep.extend(
-        [x for x in df.columns if base_reconciliation_model_name in x]
-    )
+    columns_to_keep = [
+        "ds",
+        *[x for x in df.columns if base_reconciliation_model_name in x],
+    ]
     df = df[columns_to_keep]
 
     # rename columns
@@ -146,9 +146,7 @@ def prune_fcst_df(
         )
         for e in df.columns
     }
-    df = df.rename(columns=mapper)
-
-    return df
+    return df.rename(columns=mapper)
 
 
 class HierarchicalForecastPredictor(RepresentablePredictor):
@@ -210,10 +208,10 @@ class HierarchicalForecastPredictor(RepresentablePredictor):
     ) -> None:
         super().__init__(prediction_length=prediction_length)
 
-        assert intervals_method in ["normality", "bootstrap", "permbu"]
+        assert intervals_method in {"normality", "bootstrap", "permbu"}
 
         if tags and ts_names:
-            assert set([x for values in tags.values() for x in values]) == set(
+            assert {x for values in tags.values() for x in values} == set(
                 ts_names
             ), "tags and ts_names must have the same set of ts names"
 
@@ -244,13 +242,11 @@ class HierarchicalForecastPredictor(RepresentablePredictor):
     def predict_item(self, entry: DataEntry) -> QuantileForecast:
         kwargs = {}
         if self.config.intervals is not None and all(
-            [
-                proportion not in _build_fn_name(self.hrec.reconcilers[0])
-                for proportion in [
-                    "forecast_proportions",
-                    "average_proportions",
-                    "proportion_averages",
-                ]
+            proportion not in _build_fn_name(self.hrec.reconcilers[0])
+            for proportion in [
+                "forecast_proportions",
+                "average_proportions",
+                "proportion_averages",
             ]
         ):
             kwargs["level"] = self.config.intervals
@@ -278,11 +274,7 @@ class HierarchicalForecastPredictor(RepresentablePredictor):
             **kwargs,
         )
 
-        if self.fitted:
-            params["Y_df"] = forecaster.forecast_fitted_values()
-        else:
-            params["Y_df"] = Y_df
-
+        params["Y_df"] = forecaster.forecast_fitted_values() if self.fitted else Y_df
         # reconcile forecasts
         Y_hat_df_rec = self.hrec.reconcile(**params)
 

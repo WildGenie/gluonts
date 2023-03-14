@@ -110,10 +110,7 @@ class GatedResidualNetwork(HybridBlock):
         x: Tensor,
         c: Optional[Tensor] = None,
     ) -> Tensor:
-        if self.add_skip:
-            skip = self.skip_proj(x)
-        else:
-            skip = x
+        skip = self.skip_proj(x) if self.add_skip else x
         if self.d_static > 0 and c is None:
             raise ValueError("static variable is expected.")
         if self.d_static == 0 and c is not None:
@@ -177,9 +174,9 @@ class VariableSelectionNetwork(HybridBlock):
         weight = self.weight_network(flatten, static)
         weight = F.expand_dims(weight, axis=-2)
         weight = F.softmax(weight, axis=-1)
-        var_encodings = []
-        for var, net in zip(variables, self.variable_network):
-            var_encodings.append(net(var))
+        var_encodings = [
+            net(var) for var, net in zip(variables, self.variable_network)
+        ]
         var_encodings = F.stack(*var_encodings, axis=-1)
         var_encodings = F.sum(F.broadcast_mul(var_encodings, weight), axis=-1)
         return var_encodings, weight

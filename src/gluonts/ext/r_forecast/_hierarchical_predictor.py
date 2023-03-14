@@ -153,7 +153,7 @@ class RHierarchicalForecastPredictor(RBasePredictor):
                 self.params[p] = self._robjects.rinterface.NULL
 
         if params is not None:
-            self.params.update(params)
+            self.params |= params
 
         self.is_hts = is_hts
 
@@ -172,7 +172,7 @@ class RHierarchicalForecastPredictor(RBasePredictor):
                 nodes[idx] = self._robjects.IntVector(elem)
         else:
             nodes_temp = []
-            for idx, elem in enumerate(self.nodes):
+            for elem in self.nodes:
                 nodes_temp.extend(elem)
             nodes = self._robjects.r.matrix(
                 self._robjects.IntVector(nodes_temp),
@@ -222,9 +222,7 @@ class RHierarchicalForecastPredictor(RBasePredictor):
                 ),
                 order="F",
             )
-        forecast_dict = dict(samples=hier_forecasts)
-
-        return forecast_dict
+        return dict(samples=hier_forecasts)
 
     def _preprocess_data(self, data: Dict) -> Dict:
         # R methods accept only the bottom level time series and construct

@@ -491,11 +491,7 @@ def lift(input: Union[int, Callable]):
     Note that you cannot serialize recipes that use the lift decorated
     functions.
     """
-    if isinstance(input, int):
-        num_outs = input
-    else:
-        num_outs = 1
-
+    num_outs = input if isinstance(input, int) else 1
     def w(f):
         @functools.wraps(f)
         def g(*f_args, **f_kwargs):
@@ -525,10 +521,7 @@ def lift(input: Union[int, Callable]):
 
         return g
 
-    if isinstance(input, int):
-        return w
-    else:
-        return w(input)
+    return w if isinstance(input, int) else w(input)
 
 
 class _LiftedUnpacked(Lifted):
@@ -597,10 +590,7 @@ class BinaryHolidays(Lifted):
         out = np.ones(length)
         for i, date in enumerate(self.dates):
             # Convert to string to check if inside of holidays datatime.date
-            if date.date() in self.holidays:
-                out[i] = 1.0
-            else:
-                out[i] = 0.0
+            out[i] = 1.0 if date.date() in self.holidays else 0.0
         return out
 
 
@@ -643,10 +633,7 @@ class BinaryMarkovChain(Lifted):
         out = np.ones(length, dtype=int)  # initial state is 1
         uu = np.random.rand(length)
         for i in range(1, length):
-            if uu[i] < probs[out[i - 1]]:
-                out[i] = 1 - out[i - 1]
-            else:
-                out[i] = out[i - 1]
+            out[i] = 1 - out[i - 1] if uu[i] < probs[out[i - 1]] else out[i - 1]
         return out
 
 
@@ -714,13 +701,12 @@ class RandomCat:
             probs = [self.prob_fun(x, length=c) for c in self.cardinalities]
             global_state[field_name] = probs
         probs = global_state[field_name]
-        cats = np.array(
+        return np.array(
             [
                 np.random.choice(np.arange(len(probs[i])), p=probs[i])
                 for i in range(len(probs))
             ]
         )
-        return cats
 
 
 class Lag(Lifted):
@@ -740,17 +726,12 @@ class Lag(Lifted):
         lag = resolve(self.lag, x, *args, **kwargs)
 
         if lag > 0:
-            lagged_feat = np.concatenate(
-                (self.pad_const * np.ones(lag), feat[:-lag])
-            )
+            return np.concatenate((self.pad_const * np.ones(lag), feat[:-lag]))
         elif lag < 0:
-            lagged_feat = np.concatenate(
-                (feat[-lag:], self.pad_const * np.ones(-lag))
-            )
+            return np.concatenate((feat[-lag:], self.pad_const * np.ones(-lag)))
 
         else:
-            lagged_feat = feat
-        return lagged_feat
+            return feat
 
 
 class ForEachCat(Lifted):
@@ -987,8 +968,7 @@ class Convolve(Lifted):
     def __call__(self, x: Env, length: int, *args, **kwargs):
         fil = resolve(self.filter, x, length, **kwargs)
         inp = resolve(self.input, x, length, **kwargs)
-        out = np.convolve(inp, fil, mode="same")
-        return out
+        return np.convolve(inp, fil, mode="same")
 
 
 class Dilated(Lifted):
@@ -1048,7 +1028,7 @@ class ARp(Lifted):
                 len(noise) == length
             ), f"len(noise) should be be length={length}"
 
-        v = ar_p(
+        return ar_p(
             phi=phi,
             sigma=sigma,
             length=length,
@@ -1056,7 +1036,6 @@ class ARp(Lifted):
             c=c,
             noise=noise,
         )
-        return v
 
 
 def normalized_ar1(tau, x0=None, norm="minmax", sigma=1.0):
@@ -1096,8 +1075,7 @@ class Choose(Lifted):
         options = resolve(self.options, x, length, **kwargs)
         selector = resolve(self.selector, x, length, **kwargs)
         e = np.eye(options.shape[0])
-        out = np.sum(e[selector] * options.T, axis=1)
-        return out
+        return np.sum(e[selector] * options.T, axis=1)
 
 
 class EvalRecipe(Lifted):
@@ -1110,7 +1088,4 @@ class EvalRecipe(Lifted):
 
     def __call__(self, x: Env, *args, **kwargs):
         xx = evaluate(self.recipe, *args, **kwargs)
-        if self.op is not None:
-            return resolve(self.op, xx, *args, **kwargs)
-        else:
-            return xx
+        return resolve(self.op, xx, *args, **kwargs) if self.op is not None else xx

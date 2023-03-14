@@ -129,7 +129,7 @@ class BoxCoxTransform(Bijection):
         self.lambda_1 = lambda_1
         self.lambda_2 = lambda_2
         self.tol_lambda_1 = tol_lambda_1
-        self.F = F if F else getF(lambda_1)
+        self.F = F or getF(lambda_1)
 
         # Addressing mxnet madness
         self._power = self.F.power if self.F == mx.nd else self.F.pow

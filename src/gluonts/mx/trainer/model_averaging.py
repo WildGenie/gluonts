@@ -94,7 +94,7 @@ class AveragingStrategy:
 
         average_parms = self.average(checkpoint_paths, weights)
 
-        average_parms_path = model_path + "/averaged_model-0000.params"
+        average_parms_path = f"{model_path}/averaged_model-0000.params"
         mx.nd.save(average_parms_path, average_parms)
         return average_parms_path
 
@@ -120,7 +120,7 @@ class AveragingStrategy:
             len(epoch_info_files) >= 1
         ), f"No checkpoints found in {model_path}."
 
-        all_checkpoint_info = list()
+        all_checkpoint_info = []
         for epoch_info in epoch_info_files:
             with open(epoch_info) as f:
                 all_checkpoint_info.append(json.load(f))

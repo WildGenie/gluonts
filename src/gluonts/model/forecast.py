@@ -190,7 +190,7 @@ class Quantile:
                     f' or "0.1", "0.5", ... but found {quantile}'
                 )
 
-            return cls.from_float(float(m.group(1)) / 100)
+            return cls.from_float(float(m[1]) / 100)
 
     @classmethod
     def parse(cls, quantile: Union["Quantile", float, str]) -> "Quantile":
@@ -448,10 +448,10 @@ class SampleForecast(Forecast):
         assert isinstance(
             samples, np.ndarray
         ), "samples should be a numpy array"
-        assert len(np.shape(samples)) == 2 or len(np.shape(samples)) == 3, (
-            "samples should be a 2-dimensional or 3-dimensional array."
-            " Dimensions found: {}".format(len(np.shape(samples)))
-        )
+        assert len(np.shape(samples)) in {
+            2,
+            3,
+        }, f"samples should be a 2-dimensional or 3-dimensional array. Dimensions found: {len(np.shape(samples))}"
         self.samples = samples
         self._sorted_samples_value = None
         self._mean = None
@@ -538,14 +538,7 @@ class SampleForecast(Forecast):
 
     def dim(self) -> int:
         if self._dim is None:
-            if len(self.samples.shape) == 2:
-                # univariate target
-                # shape: (num_samples, prediction_length)
-                self._dim = 1
-            else:
-                # multivariate target
-                # shape: (num_samples, prediction_length, target_dim)
-                self._dim = self.samples.shape[2]
+            self._dim = 1 if len(self.samples.shape) == 2 else self.samples.shape[2]
         return self._dim
 
     def __repr__(self):
@@ -629,7 +622,7 @@ class QuantileForecast(Forecast):
     def quantile(self, inference_quantile: Union[float, str]) -> np.ndarray:
         sorted_forecast_dict = dict(sorted(self._forecast_dict.items()))
         sorted_forecast_dict.pop("mean", None)
-        quantiles = [float(q) for q in sorted_forecast_dict.keys()]
+        quantiles = [float(q) for q in sorted_forecast_dict]
         quantile_predictions = list(sorted_forecast_dict.values())
 
         inference_quantile = Quantile.parse(inference_quantile).value

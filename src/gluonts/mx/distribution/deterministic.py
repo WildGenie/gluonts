@@ -78,10 +78,7 @@ class Deterministic(Distribution):
         is_both_nan = F.broadcast_logical_and(
             F.contrib.isnan(x), F.contrib.isnan(value)
         )
-        is_greater_equal_or_both_nan = F.broadcast_logical_or(
-            (x >= value), is_both_nan
-        )
-        return is_greater_equal_or_both_nan
+        return F.broadcast_logical_or((x >= value), is_both_nan)
 
     def sample(
         self, num_samples: Optional[int] = None, dtype=np.float32

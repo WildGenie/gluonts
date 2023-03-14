@@ -81,16 +81,12 @@ class MultivariateGaussian(Distribution):
         # L^{-1} * (x - mu)
         L_inv_times_residual = F.linalg_trsm(self.L, residual)
 
-        ll = (
+        return (
             F.broadcast_sub(
                 -d / 2 * math.log(2 * math.pi), F.linalg_sumlogdiag(self.L)
             )
-            - 1
-            / 2
-            * F.linalg_syrk(L_inv_times_residual, transpose=True).squeeze()
+            - 1 / 2 * F.linalg_syrk(L_inv_times_residual, transpose=True).squeeze()
         )
-
-        return ll
 
     @property
     def mean(self) -> Tensor:
@@ -143,7 +139,7 @@ class MultivariateGaussian(Distribution):
 class MultivariateGaussianOutput(DistributionOutput):
     @validated()
     def __init__(self, dim: int) -> None:
-        self.args_dim = {"mu": dim, "Sigma": dim * dim}
+        self.args_dim = {"mu": dim, "Sigma": dim**2}
         self.distr_cls = MultivariateGaussian
         self.dim = dim
         self.mask = None

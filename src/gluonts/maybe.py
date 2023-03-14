@@ -106,10 +106,7 @@ def map_or(val: Optional[T], fn: Callable[[T], U], default: U) -> U:
     0
 
     """
-    if val is None:
-        return default
-
-    return fn(val)
+    return default if val is None else fn(val)
 
 
 def map_or_else(
@@ -128,10 +125,7 @@ def map_or_else(
     []
 
     """
-    if val is None:
-        return factory()
-
-    return fn(val)
+    return factory() if val is None else fn(val)
 
 
 def unwrap(val: Optional[T]) -> T:
@@ -159,10 +153,7 @@ def unwrap_or(val: Optional[T], default: T) -> T:
     2
 
     """
-    if val is None:
-        return default
-
-    return val
+    return default if val is None else val
 
 
 def unwrap_or_else(val: Optional[T], factory: Callable[[], T]) -> T:
@@ -175,10 +166,7 @@ def unwrap_or_else(val: Optional[T], factory: Callable[[], T]) -> T:
     []
 
     """
-    if val is None:
-        return factory()
-
-    return val
+    return factory() if val is None else val
 
 
 def and_(val: Optional[T], other: Optional[U]) -> Optional[U]:
@@ -194,10 +182,7 @@ def and_(val: Optional[T], other: Optional[U]) -> Optional[U]:
     >>> and_(None, 2)
 
     """
-    if val is None:
-        return None
-
-    return other
+    return None if val is None else other
 
 
 def and_then(val: Optional[T], fn: Callable[[T], Optional[U]]) -> Optional[U]:
@@ -225,10 +210,7 @@ def or_(val: Optional[T], default: Optional[T]) -> Optional[T]:
     >>> or_(None, 2)
     2
     """
-    if val is None:
-        return default
-
-    return val
+    return default if val is None else val
 
 
 def or_else(
@@ -257,10 +239,7 @@ def contains(val: Optional[T], other: U) -> bool:
     >>> contains(None, 3)
     False
     """
-    if val is None:
-        return False
-
-    return val == other
+    return False if val is None else val == other
 
 
 def filter(val: Optional[T], pred: Callable[[T], bool]) -> Optional[T]:
@@ -274,10 +253,7 @@ def filter(val: Optional[T], pred: Callable[[T], bool]) -> Optional[T]:
     2
     >>> filter(None, is_even)
     """
-    if val is None or not pred(val):
-        return None
-
-    return val
+    return None if val is None or not pred(val) else val
 
 
 def xor(val: Optional[T], other: Optional[T]) -> Optional[T]:
@@ -297,10 +273,7 @@ def xor(val: Optional[T], other: Optional[T]) -> Optional[T]:
     if val is None:
         return other
 
-    if other is None:
-        return val
-
-    return None
+    return val if other is None else None
 
 
 def flatten(val: Optional[Optional[T]]) -> Optional[T]:

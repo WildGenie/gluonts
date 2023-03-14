@@ -280,10 +280,7 @@ class MeanSumQuantileLoss:
 
     @staticmethod
     def mean(**quantile_losses: np.ndarray) -> np.ndarray:
-        stacked_quantile_losses = np.stack(
-            [quantile_loss for quantile_loss in quantile_losses.values()],
-            axis=0,
-        )
+        stacked_quantile_losses = np.stack(list(quantile_losses.values()), axis=0)
         return np.ma.mean(stacked_quantile_losses, axis=0)
 
     def __call__(self, axis: Optional[int] = None) -> DerivedEvaluator:
@@ -303,10 +300,7 @@ class MeanWeightedSumQuantileLoss:
 
     @staticmethod
     def mean(**quantile_losses: np.ndarray) -> np.ndarray:
-        stacked_quantile_losses = np.stack(
-            [quantile_loss for quantile_loss in quantile_losses.values()],
-            axis=0,
-        )
+        stacked_quantile_losses = np.stack(list(quantile_losses.values()), axis=0)
         return np.ma.mean(stacked_quantile_losses, axis=0)
 
     def __call__(self, axis: Optional[int] = None) -> DerivedEvaluator:

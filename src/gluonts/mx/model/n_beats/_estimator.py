@@ -252,21 +252,18 @@ class NBEATSEstimator(GluonEstimator):
         )
 
         # check whether dimension of argument matches num_stack dimension
-        assert len(new_value) == 1 or len(new_value) == self.num_stacks, (
-            f"Invalid lengths of argument {argument_name}: {len(new_value)}."
-            f" Argument must have length 1 or {self.num_stacks} "
-        )
+        assert len(new_value) in [
+            1,
+            self.num_stacks,
+        ], f"Invalid lengths of argument {argument_name}: {len(new_value)}. Argument must have length 1 or {self.num_stacks} "
 
         # check validity of actual values
         assert all(
-            [validation_condition(val) for val in new_value]
+            validation_condition(val) for val in new_value
         ), invalidation_message
 
         # make length of arguments consistent
-        if len(new_value) == 1:
-            return new_value * self.num_stacks
-        else:
-            return new_value
+        return new_value * self.num_stacks if len(new_value) == 1 else new_value
 
     def create_transformation(self) -> Transformation:
         return AddObservedValuesIndicator(
@@ -276,7 +273,7 @@ class NBEATSEstimator(GluonEstimator):
         )
 
     def _create_instance_splitter(self, mode: str):
-        assert mode in ["training", "validation", "test"]
+        assert mode in {"training", "validation", "test"}
 
         instance_sampler = {
             "training": self.train_sampler,

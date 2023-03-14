@@ -103,7 +103,7 @@ class TransformerDecoder(HybridBlock):
         data_att, cache = self.dec_self_att(
             self.dec_pre_self_att(inputs, None),
             mask,
-            self.cache.copy() if not is_train else None,
+            None if is_train else self.cache.copy(),
         )
         data = self.dec_post_self_att(data_att, inputs)
 

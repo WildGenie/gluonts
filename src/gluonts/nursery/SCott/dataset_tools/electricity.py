@@ -32,10 +32,9 @@ def group_electricity_cv(
 ):
     dataset = get_dataset("electricity")
     len_sample = context_length + prediction_length
-    dataset_group = [[] for i in range(num_groups)]
+    dataset_group = [[] for _ in range(num_groups)]
     train_full_data = []
     test_full_data = []
-    ret = dict()
     train_it = iter(dataset.train)
     test_it = iter(dataset.test)
     # num_ts = int(dataset.metadata.feat_static_cat[0].cardinality)
@@ -51,16 +50,14 @@ def group_electricity_cv(
         "2014-03-01",
     ]
     # get ready the training data
-    for i in range(num_ts):
+    for _ in range(num_ts):
         train_entry = next(train_it)
         unsplit_ts = train_entry["target"]
         unsplit_start = train_entry["start"]
         t = unsplit_start
-        start_date = 4
-
-        for ts_sample_start in range(
+        for start_date, ts_sample_start in enumerate(range(
             0, len(unsplit_ts) - len_sample, prediction_length
-        ):
+        ), start=4):
             for j, date_ckpt in enumerate(date_checkpoint):
                 if unsplit_start < pd.Timestamp(date_ckpt):
                     sid = j
@@ -69,7 +66,6 @@ def group_electricity_cv(
                     sid = len(date_checkpoint)
                     break
             gid = ((start_date + 1) % 7) + sid * 7
-            start_date += 1
             ts_slice = unsplit_ts[
                 ts_sample_start : ts_sample_start + len_sample
             ]
@@ -92,7 +88,7 @@ def group_electricity_cv(
             unsplit_start += pd.Timedelta(hours=prediction_length)
 
     # get ready the test data
-    for i in range(int(num_ts * 0.2)):
+    for _ in range(int(num_ts * 0.2)):
         test_entry = next(test_it)
         unsplit_ts = test_entry["target"]
         unsplit_start = test_entry["start"]
@@ -111,7 +107,7 @@ def group_electricity_cv(
             )
 
     print("total number of training examples: ", len(train_full_data))
-    ret["group_ratio"] = [len(i) / len(train_full_data) for i in dataset_group]
+    ret = {"group_ratio": [len(i) / len(train_full_data) for i in dataset_group]}
     print("ratio for each group: ", ret["group_ratio"])
     random.shuffle(train_full_data)
     ret["whole_data"] = ListDataset(
@@ -138,25 +134,22 @@ def group_electricity_mb(
 ):
     dataset = get_dataset("traffic")
     len_sample = context_length + prediction_length
-    dataset_group = [[] for i in range(num_groups)]
+    dataset_group = [[] for _ in range(num_groups)]
     train_full_data = []
     test_full_data = []
-    ret = dict()
     train_it = iter(dataset.train)
     test_it = iter(dataset.test)
     # num_ts = int(dataset.metadata.feat_static_cat[0].cardinality)
     date_checkpoint = ["2016-01-01"]
     # get ready the training data
-    for i in range(num_ts):
+    for _ in range(num_ts):
         train_entry = next(train_it)
         unsplit_ts = train_entry["target"]
         unsplit_start = train_entry["start"]
         t = unsplit_start
-        start_date = 4
-
-        for ts_sample_start in range(
+        for start_date, ts_sample_start in enumerate(range(
             0, len(unsplit_ts) - len_sample, prediction_length
-        ):
+        ), start=4):
             for j, date_ckpt in enumerate(date_checkpoint):
                 if unsplit_start < pd.Timestamp(date_ckpt):
                     sid = j
@@ -165,7 +158,6 @@ def group_electricity_mb(
                     sid = len(date_checkpoint)
                     break
             gid = ((start_date + 1) % 7) + sid * 7
-            start_date += 1
             ts_slice = unsplit_ts[
                 ts_sample_start : ts_sample_start + len_sample
             ]
@@ -186,7 +178,7 @@ def group_electricity_mb(
             unsplit_start += pd.Timedelta(hours=prediction_length)
 
     # get ready the test data
-    for i in range(int(num_ts * 0.2)):
+    for _ in range(int(num_ts * 0.2)):
         test_entry = next(test_it)
         unsplit_ts = test_entry["target"]
         unsplit_start = test_entry["start"]
@@ -205,7 +197,7 @@ def group_electricity_mb(
             )
 
     print("total number of training examples: ", len(train_full_data))
-    ret["group_ratio"] = [len(i) / len(train_full_data) for i in dataset_group]
+    ret = {"group_ratio": [len(i) / len(train_full_data) for i in dataset_group]}
     print("ratio for each group: ", ret["group_ratio"])
     random.shuffle(train_full_data)
     ret["whole_data"] = ListDataset(

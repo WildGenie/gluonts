@@ -74,7 +74,7 @@ class TransformedDistributionOutput(DistributionOutput):
         # the raw outputs of the network based on the indices and map them to
         # the learnable parameters
         num_distr_args = len(self.base_distr_args_dim)
-        distr_args = args[0:num_distr_args]
+        distr_args = args[:num_distr_args]
 
         num_transforms_args = [
             len(transform_dim_args)

@@ -60,8 +60,7 @@ class Poisson(Distribution):
 
     def log_prob(self, x: Tensor) -> Tensor:
         F = self.F
-        ll = x * F.log(self.rate) - F.gammaln(x + 1.0) - self.rate
-        return ll
+        return x * F.log(self.rate) - F.gammaln(x + 1.0) - self.rate
 
     @property
     def mean(self) -> Tensor:
@@ -105,10 +104,9 @@ class PoissonOutput(DistributionOutput):
         rate = distr_args
         if scale is None:
             return Poisson(rate)
-        else:
-            F = getF(rate)
-            rate = F.broadcast_mul(rate, scale)
-            return Poisson(rate, F)
+        F = getF(rate)
+        rate = F.broadcast_mul(rate, scale)
+        return Poisson(rate, F)
 
     @property
     def event_shape(self) -> Tuple:

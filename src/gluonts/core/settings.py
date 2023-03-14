@@ -207,7 +207,7 @@ class Settings:
 
         # skip 1 (default dict)
         for dct in itertools.islice(self._chain, 1):
-            compact.update(dct)
+            compact |= dct
 
         self._chain = LinkedList([self._default, compact])
 
@@ -284,10 +284,7 @@ class Settings:
     def __getattribute__(self, key):
         # We check the key, to check whether we want to access our chainmap
         # or handle it as a normal attribute.
-        if key.startswith("_"):
-            return super().__getattribute__(key)
-        else:
-            return self[key]
+        return super().__getattribute__(key) if key.startswith("_") else self[key]
 
     def _set_(self, dct, key, value):
         """
@@ -338,7 +335,7 @@ class Settings:
         return self._chain.pop()
 
     def __repr__(self):
-        inner = ", ".join(list(repr(dct) for dct in self._chain))
+        inner = ", ".join([repr(dct) for dct in self._chain])
         return f"<Settings [{inner}]>"
 
     def _let(self, **kwargs) -> "_ScopedSettings":

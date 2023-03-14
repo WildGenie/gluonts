@@ -156,7 +156,7 @@ class DeepTPPEstimator(GluonEstimator):
         return Chain([])  # identity transformation
 
     def _create_instance_splitter(self, mode: str):
-        assert mode in ["training", "validation", "test"]
+        assert mode in {"training", "validation", "test"}
 
         instance_sampler = {
             "training": ContinuousTimeUniformSampler(

@@ -253,8 +253,8 @@ class DeepARNetwork(mx.gluon.HybridBlock):
         """
         state = begin_state
         imputed_sequence = sequence
-        outputs = list()
-        for i in range(0, subsequences_length):
+        outputs = []
+        for i in range(subsequences_length):
             # unroll encoder
             input_data = self.prepare_inputs_imputation_step(
                 F,
@@ -422,13 +422,12 @@ class DeepARNetwork(mx.gluon.HybridBlock):
                 num_samples=self.num_imputation_samples, dtype=self.dtype
             ).mean(axis=0)
 
-        target_value = mx_switch(
+        return mx_switch(
             F,
             (current_observed_indicator, current_target),
             (is_pad, F.zeros_like(sample)),
             sample,
         )
-        return target_value
 
     def insert_imputed_target(
         self,
@@ -439,13 +438,11 @@ class DeepARNetwork(mx.gluon.HybridBlock):
         post_sequence,
         target_value,
     ):
-        if i < subsequences_length - 1:
-            imputed_sequence = F.concat(
-                pre_sequence, target_value, post_sequence, dim=1
-            )
-        else:
-            imputed_sequence = F.concat(pre_sequence, target_value, dim=1)
-        return imputed_sequence
+        return (
+            F.concat(pre_sequence, target_value, post_sequence, dim=1)
+            if i < subsequences_length - 1
+            else F.concat(pre_sequence, target_value, dim=1)
+        )
 
     def unroll_encoder_imputation(
         self,
