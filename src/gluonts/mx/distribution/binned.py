@@ -157,11 +157,10 @@ class Binned(Distribution):
         # TODO: when mxnet has searchsorted replace this
         left_edges = self.bin_edges.slice_axis(axis=-1, begin=0, end=-1)
         right_edges = self.bin_edges.slice_axis(axis=-1, begin=1, end=None)
-        mask = F.broadcast_mul(
+        return F.broadcast_mul(
             F.broadcast_lesser_equal(left_edges, x),
             F.broadcast_lesser(x, right_edges),
         )
-        return mask
 
     @staticmethod
     def _smooth_mask(F, mask, alpha):

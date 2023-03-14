@@ -76,7 +76,7 @@ def ar_p(
     phi_ = np.asarray(phi, dtype=np.float64)
     for t in range(p, length + p):
         u = 0.0
-        for i in range(0, p):
+        for i in range(p):
             u += phi_[i] * x[t - i - 1]
         x[t] = c + u + sigma * noise_[t - p]
     return x[p:]

@@ -204,9 +204,7 @@ class MultiHeadAttentionBase(HybridBlock):
 
         assert (
             att_dim_in % heads == 0
-        ), "Number of heads {} must divide attention att_dim_in {}".format(
-            heads, att_dim_in
-        )
+        ), f"Number of heads {heads} must divide attention att_dim_in {att_dim_in}"
 
         self.att_dim_in = att_dim_in
         self.heads = heads
@@ -544,6 +542,6 @@ class TransformerProcessBlock(HybridBlock):
                 if self.dropout > 0.0:
                     data = F.Dropout(data, p=self.dropout)
             else:
-                raise ValueError("Unknown step in sequence: %s" % step)
+                raise ValueError(f"Unknown step in sequence: {step}")
 
         return data

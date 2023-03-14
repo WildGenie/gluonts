@@ -53,9 +53,10 @@ class FeatureImportanceResult(BaseModel):
         return values
 
     def mean(self, axis=None) -> "FeatureImportanceResult":
-        mean_dict = {}
-        for key, val in self.dict().items():
-            mean_dict[key] = np.mean(val, axis=axis).tolist() if val else []
+        mean_dict = {
+            key: np.mean(val, axis=axis).tolist() if val else []
+            for key, val in self.dict().items()
+        }
         return FeatureImportanceResult(**mean_dict)
 
 

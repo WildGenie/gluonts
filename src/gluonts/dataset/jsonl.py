@@ -140,9 +140,7 @@ class JsonLinesFile:
         with self.open() as file_obj:
             file_obj.seek(self.start)
 
-            for line in take(self.n, file_obj):
-                lengths.append(len(line))
-
+            lengths.extend(len(line) for line in take(self.n, file_obj))
         return np.cumsum(lengths[:-1])
 
     def __getitem__(self, idx):
@@ -184,9 +182,5 @@ class JsonLinesWriter(DatasetWriter):
         if name is None:
             name = "data"
 
-        if self.use_gzip:
-            suffix = self.suffix + ".gz"
-        else:
-            suffix = self.suffix
-
+        suffix = self.suffix + ".gz" if self.use_gzip else self.suffix
         self.write_to_file(dataset, (folder / name).with_suffix(suffix))

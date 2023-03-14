@@ -225,11 +225,11 @@ class ConstantDataset(ArtificialDataset):
         if self.is_trend:
             recipe_type += LinearTrend()
         if self.is_promotions:
-            recipe.append(
-                ("binary_causal", BinaryMarkovChain(one_to_zero, zero_to_one))
-            )
-            recipe.append(
-                (FieldName.FEAT_DYNAMIC_REAL, Stack(["binary_causal"]))
+            recipe.extend(
+                (
+                    ("binary_causal", BinaryMarkovChain(one_to_zero, zero_to_one)),
+                    (FieldName.FEAT_DYNAMIC_REAL, Stack(["binary_causal"])),
+                )
             )
             recipe_type += scale_features * Lag("binary_causal", lag=0)
         if self.holidays:
@@ -237,11 +237,11 @@ class ConstantDataset(ArtificialDataset):
             dates = list(
                 pd.period_range(self.start, periods=num_steps, freq=self.freq)
             )
-            recipe.append(
-                ("binary_holidays", BinaryHolidays(dates, self.holidays))
-            )
-            recipe.append(
-                (FieldName.FEAT_DYNAMIC_REAL, Stack(["binary_holidays"]))
+            recipe.extend(
+                (
+                    ("binary_holidays", BinaryHolidays(dates, self.holidays)),
+                    (FieldName.FEAT_DYNAMIC_REAL, Stack(["binary_holidays"])),
+                )
             )
             recipe_type += scale_features * Lag("binary_holidays", lag=0)
         recipe.append((FieldName.TARGET, recipe_type))
@@ -255,8 +255,7 @@ class ConstantDataset(ArtificialDataset):
             # values per time series
             num_timeseries=1,
         )
-        generated = data.generate()
-        return generated
+        return data.generate()
 
     def piecewise_constant(self, index: int, num_steps: int) -> List:
         target = []

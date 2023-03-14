@@ -54,7 +54,7 @@ class PeriodicKernel(Kernel):
             A module that can either refer to the Symbol API or the NDArray
             API in MXNet.
         """
-        self.F = F if F else getF(amplitude)
+        self.F = F or getF(amplitude)
         self.amplitude = amplitude
         self.length_scale = length_scale
         self.frequency = frequency

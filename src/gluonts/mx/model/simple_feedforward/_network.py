@@ -76,7 +76,7 @@ class SimpleFeedForwardNetworkBase(mx.gluon.HybridBlock):
             self.distr_args_proj = self.distr_output.get_args_proj()
             self.mlp = mx.gluon.nn.HybridSequential()
             dims = self.num_hidden_dimensions
-            for layer_no, units in enumerate(dims[:-1]):
+            for units in dims[:-1]:
                 self.mlp.add(mx.gluon.nn.Dense(units=units, activation="relu"))
                 if self.batch_normalization:
                     self.mlp.add(mx.gluon.nn.BatchNorm())
@@ -163,12 +163,9 @@ class SimpleFeedForwardTrainingNetwork(SimpleFeedForwardNetworkBase):
         # (batch_size, prediction_length, target_dim)
         loss = distr.loss(future_target)
 
-        weighted_loss = weighted_average(
+        return weighted_average(
             F=F, x=loss, weights=future_observed_values, axis=1
         )
-
-        # (batch_size, )
-        return weighted_loss
 
 
 class SimpleFeedForwardSamplingNetwork(SimpleFeedForwardNetworkBase):

@@ -41,9 +41,8 @@ class ArrowEncoder:
         ndarray_columns = set()
 
         for name, value in sample.items():
-            if isinstance(value, np.ndarray):
-                if value.ndim > 1:
-                    ndarray_columns.add(name)
+            if isinstance(value, np.ndarray) and value.ndim > 1:
+                ndarray_columns.add(name)
 
             columns.append(name)
 

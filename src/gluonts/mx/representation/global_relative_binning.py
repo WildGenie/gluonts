@@ -169,7 +169,4 @@ class GlobalRelativeBinning(Representation):
             bin_centers_hyb * transf_samples, axis=1
         ).expand_dims(-1)
 
-        # Transform bin centers back to the oiginal scale
-        x = F.broadcast_mul(scale, transf_samples)
-
-        return x
+        return F.broadcast_mul(scale, transf_samples)

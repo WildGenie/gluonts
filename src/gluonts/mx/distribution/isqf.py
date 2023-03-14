@@ -935,13 +935,12 @@ class ISQFOutput(DistributionOutput):
             return self.distr_cls(
                 *distr_args, qk_x, self.num_qk, self.num_pieces, self.tol
             )
-        else:
-            distr = self.distr_cls(
-                *distr_args, qk_x, self.num_qk, self.num_pieces, self.tol
-            )
-            return TransformedISQF(
-                distr, [AffineTransformation(loc=loc, scale=scale)]
-            )
+        distr = self.distr_cls(
+            *distr_args, qk_x, self.num_qk, self.num_pieces, self.tol
+        )
+        return TransformedISQF(
+            distr, [AffineTransformation(loc=loc, scale=scale)]
+        )
 
     def reshape_spline_args(self, distr_args, qk_x):
         """

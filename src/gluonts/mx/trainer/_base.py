@@ -187,7 +187,7 @@ class Trainer:
         net: nn.HybridBlock,
         train_iter: DataLoader,
         validation_iter: Optional[DataLoader] = None,
-    ) -> None:  # TODO: we may want to return some training information here
+    ) -> None:    # TODO: we may want to return some training information here
         """
         Train a network, given an iterable over training (and optionally
         validation) batches.
@@ -209,14 +209,14 @@ class Trainer:
 
         logger.info("Start model training")
 
-        with tempfile.TemporaryDirectory(
-            prefix="gluonts-trainer-temp-"
-        ) as gluonts_temp, HybridContext(
-            net=net,
-            hybridize=self.hybridize,
-            static_alloc=True,
-            static_shape=True,
-        ):
+        with (tempfile.TemporaryDirectory(
+                prefix="gluonts-trainer-temp-"
+            ) as gluonts_temp, HybridContext(
+                net=net,
+                hybridize=self.hybridize,
+                static_alloc=True,
+                static_shape=True,
+            )):
 
             def base_path() -> str:
                 return os.path.join(
@@ -245,11 +245,11 @@ class Trainer:
             first_forward = True
 
             def loop(  # todo call run epoch
-                epoch_no,
-                batch_iter,
-                num_batches_to_use: Optional[int] = None,
-                is_training: bool = True,
-            ) -> mx.metric.Loss:
+                        epoch_no,
+                        batch_iter,
+                        num_batches_to_use: Optional[int] = None,
+                        is_training: bool = True,
+                    ) -> mx.metric.Loss:
                 nonlocal first_forward
                 tic = time.time()
 
@@ -313,11 +313,7 @@ class Trainer:
                         # forward returns a list in the case of hybrid and a
                         # tuple otherwise we may wrap network outputs in the
                         # future to avoid this type check
-                        if isinstance(output, (list, tuple)):
-                            loss = output[0]
-                        else:
-                            loss = output
-
+                        loss = output[0] if isinstance(output, (list, tuple)) else output
                         batch_size = loss.shape[0]
 
                     if not np.isfinite(ndarray.sum(loss).asscalar()):
@@ -370,10 +366,7 @@ class Trainer:
                 it.close()
 
                 if not any_batches:
-                    if is_training:
-                        error_data_type = "training"
-                    else:
-                        error_data_type = "validation"
+                    error_data_type = "training" if is_training else "validation"
                     raise GluonTSDataError(
                         "No "
                         + error_data_type

@@ -165,10 +165,9 @@ class MixtureDistribution(Distribution):
     def cdf(self, x: Tensor) -> Tensor:
         F = self.F
         cdf_values = F.stack(*[c.cdf(x) for c in self.components], axis=-1)
-        erg = F.sum(
+        return F.sum(
             F.broadcast_mul(cdf_values, self.mixture_probs, axis=-1), axis=-1
         )
-        return erg
 
     @property
     def stddev(self) -> Tensor:
@@ -205,9 +204,7 @@ class MixtureDistribution(Distribution):
             idx = idx.expand_dims(axis=-1)
         idx = idx.broadcast_like(samples_list[0])
 
-        selected_samples = F.pick(data=samples, index=idx, axis=-1)
-
-        return selected_samples
+        return F.pick(data=samples, index=idx, axis=-1)
 
 
 class MixtureArgs(gluon.HybridBlock):

@@ -55,10 +55,7 @@ def jacobian_sn_mlp_block_bf(
                 axes=range(len(input.shape[:-1])),
                 sizes=input.shape[:-1],
             )
-            if i == 0:
-                jac = jac_t
-            else:
-                jac = gemm2(jac, jac_t)
+            jac = jac_t if i == 0 else gemm2(jac, jac_t)
         else:
             # act_deriv is of shape (Batch dim1, ..., Input dim)
             act_deriv = get_activation_deriv(layer)(mx.ndarray, input)
@@ -186,7 +183,5 @@ class SNMLPBlock(mx.gluon.HybridBlock):
                     " term..."
                 )
                 self(x)
-            return jacobian_sn_mlp_block_bf(
-                [(l, i) for l, i in zip(self._layers, self._cached_inputs)]
-            )
+            return jacobian_sn_mlp_block_bf(list(zip(self._layers, self._cached_inputs)))
         raise NotImplementedError(self._jacobian_method)

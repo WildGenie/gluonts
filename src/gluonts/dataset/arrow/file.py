@@ -95,10 +95,7 @@ class ArrowFile(File):
 
     def location_for(self, idx):
         batch_no = np.searchsorted(self.batch_offsets, idx)
-        if batch_no == 0:
-            batch_idx = idx
-        else:
-            batch_idx = idx - self.batch_offsets[batch_no - 1]
+        batch_idx = idx if batch_no == 0 else idx - self.batch_offsets[batch_no - 1]
         return batch_no, batch_idx
 
     @property
@@ -110,11 +107,7 @@ class ArrowFile(File):
             yield self.reader.get_batch(batch_no)
 
     def __len__(self):
-        if len(self.batch_offsets) > 0:
-            return self.batch_offsets[-1]
-
-        # empty file
-        return 0
+        return self.batch_offsets[-1] if len(self.batch_offsets) > 0 else 0
 
     def __iter__(self):
         for batch in self.iter_batches():

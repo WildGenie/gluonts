@@ -165,7 +165,7 @@ class InvertibleResnetHybridBlock(BijectionHybridBlock):
         """
         if self._ignore_logdet:
             assert x is not None
-            ladj = mx.nd.zeros(x.shape[0])
+            return mx.nd.zeros(x.shape[0])
         else:
             # we take the negative value since we use the forward pass of mlp
             # to compute the inverse, and we want ladj of forward, which is
@@ -180,9 +180,7 @@ class InvertibleResnetHybridBlock(BijectionHybridBlock):
                 axes=range(len(batch_shape)),
                 sizes=batch_shape,
             )
-            ladj = -log_abs_det(identity + jac_block)
-
-        return ladj
+            return -log_abs_det(identity + jac_block)
 
 
 def iresnet(num_blocks: int, **block_kwargs) -> ComposedBijectionHybridBlock:

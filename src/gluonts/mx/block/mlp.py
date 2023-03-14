@@ -43,7 +43,7 @@ class MLP(nn.HybridBlock):
         self.layer_sizes = layer_sizes
         with self.name_scope():
             self.layers = nn.HybridSequential()
-            for layer, layer_dim in enumerate(layer_sizes):
+            for layer_dim in layer_sizes:
                 self.layers.add(
                     nn.Dense(layer_dim, flatten=flatten, activation=activation)
                 )

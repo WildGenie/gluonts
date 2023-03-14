@@ -93,8 +93,7 @@ class StudentT(Distribution):
             - F.log(sigma)
         )
 
-        ll = Z - nup1_half * F.log1p(part1)
-        return ll
+        return Z - nup1_half * F.log1p(part1)
 
     def sample(
         self, num_samples: Optional[int] = None, dtype=np.float32

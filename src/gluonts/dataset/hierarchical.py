@@ -211,7 +211,7 @@ class HierarchicalTimeSeries:
         else:
             feat_dynamic_real = pd.DataFrame()
 
-        pandas_ds = PandasDataset(
+        return PandasDataset(
             dataframes=pd.concat(
                 [self.ts_at_all_levels, feat_dynamic_real],
                 axis=1,
@@ -220,5 +220,3 @@ class HierarchicalTimeSeries:
             feat_dynamic_real=list(feat_dynamic_real.columns),
             future_length=future_length,
         )
-
-        return pandas_ds

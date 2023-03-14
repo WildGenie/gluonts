@@ -250,12 +250,12 @@ class Evaluator:
 
         rows = []
 
-        with tqdm(
-            zip(ts_iterator, fcst_iterator),
-            total=num_series,
-            desc="Running evaluation",
-        ) as it, np.errstate(divide="ignore", invalid="ignore"):
-            if self.num_workers and not sys.platform == "win32":
+        with (tqdm(
+                zip(ts_iterator, fcst_iterator),
+                total=num_series,
+                desc="Running evaluation",
+            ) as it, np.errstate(divide="ignore", invalid="ignore")):
+            if self.num_workers and sys.platform != "win32":
                 mp_pool = multiprocessing.Pool(
                     initializer=None, processes=self.num_workers
                 )
@@ -435,7 +435,7 @@ class Evaluator:
                     logging.warning(f"Error occurred when evaluating {k}.")
                     val = {k: np.nan}
 
-                metrics.update(val)
+                metrics |= val
 
         try:
             metrics["MSIS"] = msis(
@@ -497,7 +497,7 @@ class Evaluator:
 
         if self.custom_eval_fn is not None:
             for k, (_, agg_type, _) in self.custom_eval_fn.items():
-                agg_funs.update({k: agg_type})
+                agg_funs[k] = agg_type
 
         assert (
             set(metric_per_ts.columns) >= agg_funs.keys()
@@ -680,7 +680,7 @@ class MultivariateEvaluator(Evaluator):
         eval_dims = (
             self._eval_dims
             if self._eval_dims is not None
-            else list(range(0, target_dimensionality))
+            else list(range(target_dimensionality))
         )
         assert max(eval_dims) < target_dimensionality, (
             "eval dims should range from 0 to target_dimensionality - 1, "
@@ -768,8 +768,8 @@ class MultivariateEvaluator(Evaluator):
         ts_iterator = iter(ts_iterator)
         fcst_iterator = iter(fcst_iterator)
 
-        all_agg_metrics = dict()
-        all_metrics_per_ts = list()
+        all_agg_metrics = {}
+        all_metrics_per_ts = []
 
         peeked_forecast, fcst_iterator = self.peek(fcst_iterator)
         target_dimensionality = self.get_target_dimensionality(peeked_forecast)

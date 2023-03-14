@@ -256,17 +256,15 @@ class ParallelizedPredictor(Predictor):
 
     def _grouper(self, iterable, n):
         iterator = iter(iterable)
-        group = tuple(itertools.islice(iterator, n))
-        while group:
+        while group := tuple(itertools.islice(iterator, n)):
             yield group
-            group = tuple(itertools.islice(iterator, n))
 
     def terminate(self):
         for q in self._input_queues:
             q.put((None, None))
         for w in self._workers:
             w.terminate()
-        for i, w in enumerate(self._workers):
+        for w in self._workers:
             w.join()
 
     def predict(self, dataset: Dataset, **kwargs) -> Iterator[Forecast]:
@@ -347,7 +345,7 @@ class ParallelizedPredictor(Predictor):
                     self._num_running_workers -= 1
                     continue
                 yield from get_next_from_buffer()
-            assert len(self._data_buffer) == 0
+            assert not self._data_buffer
             assert self._send_idx == self._next_idx
 
 

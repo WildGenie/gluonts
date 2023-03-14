@@ -78,7 +78,7 @@ def equals_parameter_dict(
         strip_prefix_enumeration(key, that.prefix) for key in that.keys()
     ]
 
-    if not this_param_names_stripped == that_param_names_stripped:
+    if this_param_names_stripped != that_param_names_stripped:
         return False
 
     for this_param_name, that_param_name in zip(this.keys(), that.keys()):
@@ -126,13 +126,13 @@ def equals_representable_block(
         Specialization of :func:`equals` for Gluon
         :class:`~mxnet.gluon.ParameterDict` input arguments.
     """
-    if not equals_default_impl(this, that):
-        return False
-
-    if not equals_parameter_dict(this.collect_params(), that.collect_params()):
-        return False
-
-    return True
+    return (
+        bool(
+            equals_parameter_dict(this.collect_params(), that.collect_params())
+        )
+        if equals_default_impl(this, that)
+        else False
+    )
 
 
 @skip_encoding.register(mx.gluon.ParameterDict)

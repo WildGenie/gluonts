@@ -45,10 +45,7 @@ def join(a, b, sep="."):
     """
     Joins `a` and `b` using `sep`.
     """
-    if not a:
-        return b
-
-    return f"{a}{sep}{b}"
+    return f"{a}{sep}{b}" if a else b
 
 
 def _encode(data: Any, path: str, result: dict):
@@ -81,9 +78,11 @@ def _encode(data: Any, path: str, result: dict):
 
 
 def _asdict(trie):
-    if not isinstance(trie, defaultdict):
-        return trie
-    return {k: _asdict(v) for k, v in trie.items()}
+    return (
+        {k: _asdict(v) for k, v in trie.items()}
+        if isinstance(trie, defaultdict)
+        else trie
+    )
 
 
 def nest(data):
@@ -112,41 +111,37 @@ def get_args(data):
 
 
 def _translate(data):
-    if isinstance(data, dict):
-        if "()" in data:
-            ty = data.pop("()")
-            args = get_args(data)
-            kwargs = valmap(_translate, data)
+    if not isinstance(data, dict):
+        return list(map(_translate, data)) if isinstance(data, list) else data
+    if "()" in data:
+        ty = data.pop("()")
+        args = get_args(data)
+        kwargs = valmap(_translate, data)
 
-            return {
-                "__kind__": "instance",
-                "class": ty,
-                "args": args,
-                "kwargs": kwargs,
-            }
+        return {
+            "__kind__": "instance",
+            "class": ty,
+            "args": args,
+            "kwargs": kwargs,
+        }
 
-        if "!" in data:
-            ty = data.pop("!")
-            kwargs = valmap(_translate, data)
+    if "!" in data:
+        ty = data.pop("!")
+        kwargs = valmap(_translate, data)
 
-            return {
-                "__kind__": "stateful",
-                "class": ty,
-                "kwargs": kwargs,
-            }
+        return {
+            "__kind__": "stateful",
+            "class": ty,
+            "kwargs": kwargs,
+        }
 
-        if "#" in data:
-            return {
-                "__kind__": "type",
-                "class": data.pop("#"),
-            }
+    if "#" in data:
+        return {
+            "__kind__": "type",
+            "class": data.pop("#"),
+        }
 
-        return valmap(_translate, data)
-
-    if isinstance(data, list):
-        return list(map(_translate, data))
-
-    return data
+    return valmap(_translate, data)
 
 
 def decode(data: dict) -> Any:

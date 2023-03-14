@@ -71,14 +71,14 @@ class LSTNetBase(nn.HybridBlock):
                 "tanh",
             ], "`output_activation` must be either 'sigmiod' or 'tanh' "
         self.output_activation = output_activation
-        assert rnn_cell_type in [
+        assert rnn_cell_type in {
             "gru",
             "lstm",
-        ], "`rnn_cell_type` must be either 'gru' or 'lstm' "
-        assert skip_rnn_cell_type in [
+        }, "`rnn_cell_type` must be either 'gru' or 'lstm' "
+        assert skip_rnn_cell_type in {
             "gru",
             "lstm",
-        ], "`skip_rnn_cell_type` must be either 'gru' or 'lstm' "
+        }, "`skip_rnn_cell_type` must be either 'gru' or 'lstm' "
         self.conv_out = context_length - kernel_size + 1
         self.conv_skip = self.conv_out // skip_size
         assert self.conv_skip > 0, (
@@ -185,8 +185,7 @@ class LSTNetBase(nn.HybridBlock):
             observed, axis=2, begin=-self.ar_window, end=None
         )  # NCT
         ar_fc_inputs = F.concat(ar_x, ar_observed, dim=-1)
-        ar = self.ar_fc(ar_fc_inputs)  # NxCx(1 or prediction_length)
-        return ar
+        return self.ar_fc(ar_fc_inputs)
 
     def hybrid_forward(
         self, F, past_target: Tensor, past_observed_values: Tensor

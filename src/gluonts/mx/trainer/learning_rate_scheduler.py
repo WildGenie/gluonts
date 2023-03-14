@@ -33,10 +33,7 @@ class Objective:
 
     @staticmethod
     def from_str(s: Literal["min", "max"]) -> "Objective":
-        if s == "min":
-            return Min()
-        else:
-            return Max()
+        return Min() if s == "min" else Max()
 
     def update(self, metric: float) -> bool:
         if self.should_update(metric):
@@ -187,9 +184,7 @@ class MetricAttentiveScheduler:
 
             self.learning_rate *= self.decay_factor
             # ensure that we don't go below the minimum learning rate
-            if self.learning_rate < self.min_learning_rate:
-                self.learning_rate = self.min_learning_rate
-
+            self.learning_rate = max(self.learning_rate, self.min_learning_rate)
         return should_continue
 
 

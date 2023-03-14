@@ -211,10 +211,10 @@ class DeepAREstimator(GluonEstimator):
         ), f"`dropoutcell_type` should be one of {supported_dropoutcell_types}"
         assert dropout_rate >= 0, "The value of `dropout_rate` should be >= 0"
         assert cardinality is None or all(
-            [c > 0 for c in cardinality]
+            c > 0 for c in cardinality
         ), "Elements of `cardinality` should be > 0"
         assert embedding_dimension is None or all(
-            [e > 0 for e in embedding_dimension]
+            e > 0 for e in embedding_dimension
         ), "Elements of `embedding_dimension` should be > 0"
         assert (
             num_parallel_samples > 0
@@ -304,72 +304,80 @@ class DeepAREstimator(GluonEstimator):
             remove_field_names.append(FieldName.FEAT_DYNAMIC_REAL)
 
         return Chain(
-            [RemoveFields(field_names=remove_field_names)]
-            + (
-                [SetField(output_field=FieldName.FEAT_STATIC_CAT, value=[0.0])]
-                if not self.use_feat_static_cat
-                else []
-            )
-            + (
-                [
-                    SetField(
-                        output_field=FieldName.FEAT_STATIC_REAL, value=[0.0]
-                    )
-                ]
-                if not self.use_feat_static_real
-                else []
-            )
-            + [
-                AsNumpyArray(
-                    field=FieldName.FEAT_STATIC_CAT,
-                    expected_ndim=1,
-                    dtype=self.dtype,
-                ),
-                AsNumpyArray(
-                    field=FieldName.FEAT_STATIC_REAL,
-                    expected_ndim=1,
-                    dtype=self.dtype,
-                ),
-                AsNumpyArray(
-                    field=FieldName.TARGET,
-                    # in the following line, we add 1 for the time dimension
-                    expected_ndim=1 + len(self.distr_output.event_shape),
-                    dtype=self.dtype,
-                ),
-                AddObservedValuesIndicator(
-                    target_field=FieldName.TARGET,
-                    output_field=FieldName.OBSERVED_VALUES,
-                    dtype=self.dtype,
-                    imputation_method=self.imputation_method,
-                ),
-                AddTimeFeatures(
-                    start_field=FieldName.START,
-                    target_field=FieldName.TARGET,
-                    output_field=FieldName.FEAT_TIME,
-                    time_features=self.time_features,
-                    pred_length=self.prediction_length,
-                ),
-                AddAgeFeature(
-                    target_field=FieldName.TARGET,
-                    output_field=FieldName.FEAT_AGE,
-                    pred_length=self.prediction_length,
-                    log_scale=True,
-                    dtype=self.dtype,
-                ),
-                VstackFeatures(
-                    output_field=FieldName.FEAT_TIME,
-                    input_fields=[FieldName.FEAT_TIME, FieldName.FEAT_AGE]
+            (
+                (
+                    [RemoveFields(field_names=remove_field_names)]
                     + (
-                        [FieldName.FEAT_DYNAMIC_REAL]
-                        if self.use_feat_dynamic_real
-                        else []
+                        []
+                        if self.use_feat_static_cat
+                        else [
+                            SetField(
+                                output_field=FieldName.FEAT_STATIC_CAT, value=[0.0]
+                            )
+                        ]
+                    )
+                )
+                + (
+                    []
+                    if self.use_feat_static_real
+                    else [
+                        SetField(
+                            output_field=FieldName.FEAT_STATIC_REAL, value=[0.0]
+                        )
+                    ]
+                )
+                + [
+                    AsNumpyArray(
+                        field=FieldName.FEAT_STATIC_CAT,
+                        expected_ndim=1,
+                        dtype=self.dtype,
                     ),
-                ),
-            ]
+                    AsNumpyArray(
+                        field=FieldName.FEAT_STATIC_REAL,
+                        expected_ndim=1,
+                        dtype=self.dtype,
+                    ),
+                    AsNumpyArray(
+                        field=FieldName.TARGET,
+                        # in the following line, we add 1 for the time dimension
+                        expected_ndim=1 + len(self.distr_output.event_shape),
+                        dtype=self.dtype,
+                    ),
+                    AddObservedValuesIndicator(
+                        target_field=FieldName.TARGET,
+                        output_field=FieldName.OBSERVED_VALUES,
+                        dtype=self.dtype,
+                        imputation_method=self.imputation_method,
+                    ),
+                    AddTimeFeatures(
+                        start_field=FieldName.START,
+                        target_field=FieldName.TARGET,
+                        output_field=FieldName.FEAT_TIME,
+                        time_features=self.time_features,
+                        pred_length=self.prediction_length,
+                    ),
+                    AddAgeFeature(
+                        target_field=FieldName.TARGET,
+                        output_field=FieldName.FEAT_AGE,
+                        pred_length=self.prediction_length,
+                        log_scale=True,
+                        dtype=self.dtype,
+                    ),
+                    VstackFeatures(
+                        output_field=FieldName.FEAT_TIME,
+                        input_fields=[FieldName.FEAT_TIME, FieldName.FEAT_AGE]
+                        + (
+                            [FieldName.FEAT_DYNAMIC_REAL]
+                            if self.use_feat_dynamic_real
+                            else []
+                        ),
+                    ),
+                ]
+            )
         )
 
     def _create_instance_splitter(self, mode: str):
-        assert mode in ["training", "validation", "test"]
+        assert mode in {"training", "validation", "test"}
 
         instance_sampler = {
             "training": self.train_sampler,

@@ -68,43 +68,34 @@ print(
 )
 
 
-## ICDF:
-quantiles = []
-
 plot_range = np.linspace(0.0, 1.0, 300)
-for q in plot_range:
-    quantiles.append(
-        binned_distr.icdf(torch.tensor([q]))[0, 0].detach().cpu().numpy()
-    )
+quantiles = [
+    binned_distr.icdf(torch.tensor([q]))[0, 0].detach().cpu().numpy()
+    for q in plot_range
+]
 plt.plot(plot_range, quantiles)
 plt.show()
-
-## CDF:
-quantiles = []
 
 plot_range = range(-40, 30)
-for q in plot_range:
-    quantiles.append(
-        binned_distr.cdf(torch.tensor([q]).repeat(2, 3))[0, 0]
-        .detach()
-        .cpu()
-        .numpy()
-    )
+quantiles = [
+    binned_distr.cdf(torch.tensor([q]).repeat(2, 3))[0, 0]
+    .detach()
+    .cpu()
+    .numpy()
+    for q in plot_range
+]
 plt.plot(plot_range, quantiles)
 
 plt.show()
 
-## PDF:
-quantiles = []
-
 plot_range = range(-40, 35)
-for q in plot_range:
-    quantiles.append(
-        binned_distr.pdf(torch.tensor([q]).repeat(2, 3))[0, 0]
-        .detach()
-        .cpu()
-        .numpy()
-    )
+quantiles = [
+    binned_distr.pdf(torch.tensor([q]).repeat(2, 3))[0, 0]
+    .detach()
+    .cpu()
+    .numpy()
+    for q in plot_range
+]
 plt.plot(plot_range, quantiles)
 
 plt.plot(binned_distr.mean[0, 0], 0.0, "o")
@@ -118,7 +109,7 @@ plt.show()
 
 ### Empirical PDF from samples:
 
-samples = binned_distr.sample(torch.tensor(range(0, 5000)).shape)
+samples = binned_distr.sample(torch.tensor(range(5000)).shape)
 
 print("samples", samples.shape)
 

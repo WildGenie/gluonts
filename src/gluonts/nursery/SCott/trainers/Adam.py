@@ -55,11 +55,7 @@ class Adam:
     def inference(self, model, inputs):
         output = model(*inputs)
         output = output.mean()
-        if isinstance(output, (list, tuple)):
-            loss = output[0]
-        else:
-            loss = output
-        return loss
+        return output[0] if isinstance(output, (list, tuple)) else output
 
     def __call__(
         self, net: nn.Module, input_names: List[str], data_loaders
@@ -74,15 +70,15 @@ class Adam:
 
         timer = Timer()
 
-        training_iter = iter(data_loaders["training_data_loader"])
         full_batch_iter = iter(data_loaders["full_batch_loader"])
 
         avg_epoch_grad = 0.0
+        training_iter = iter(data_loaders["training_data_loader"])
         for epoch_no in range(self.epochs):
             if self.decreasing_step_size:
                 for param_group in optimizer.param_groups:
                     param_group["lr"] *= 1 / math.sqrt(epoch_no + 1)
-            for batch_no in range(self.num_batches_per_epoch):
+            for _ in range(self.num_batches_per_epoch):
                 with timer("gradient oracle"):
                     data_entry = next(training_iter)
                     optimizer.zero_grad()
@@ -164,9 +160,5 @@ class Adam:
 
         writer.close()
         print(
-            "task: "
-            + self.task_name
-            + " on Adam with lr="
-            + str(self.learning_rate)
-            + " is done!"
+            f"task: {self.task_name} on Adam with lr={str(self.learning_rate)} is done!"
         )

@@ -99,5 +99,4 @@ class MeanScaling(Representation):
     def post_transform(
         self, F, samples: Tensor, scale: Tensor, rep_params: List[Tensor]
     ) -> Tensor:
-        transf_samples = F.broadcast_mul(samples, scale)
-        return transf_samples
+        return F.broadcast_mul(samples, scale)

@@ -126,7 +126,7 @@ class NanMixtureArgs(gluon.HybridBlock):
     def hybrid_forward(self, F, x: Tensor) -> Tuple[Tensor, ...]:
         nan_prob = self.proj_nan_prob(x)
         component_args = self.component_projection(x)
-        return tuple([nan_prob.squeeze(axis=-1), component_args])
+        return nan_prob.squeeze(axis=-1), component_args
 
 
 class NanMixtureOutput(DistributionOutput):

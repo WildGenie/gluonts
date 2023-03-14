@@ -47,16 +47,16 @@ class FeatureEmbedder(nn.HybridBlock):
         super().__init__(**kwargs)
 
         assert (
-            len(cardinalities) > 0
+            cardinalities
         ), "Length of `cardinalities` list must be greater than zero"
         assert len(cardinalities) == len(
             embedding_dims
         ), "Length of `cardinalities` and `embedding_dims` should match"
         assert all(
-            [c > 0 for c in cardinalities]
+            c > 0 for c in cardinalities
         ), "Elements of `cardinalities` should be > 0"
         assert all(
-            [d > 0 for d in embedding_dims]
+            d > 0 for d in embedding_dims
         ), "Elements of `embedding_dims` should be > 0"
 
         self.__num_features = len(cardinalities)

@@ -416,5 +416,4 @@ def _sample_multiple(
         for k, v in kwargs.items()
         if v is not None
     }
-    samples = sample_func(*args_expanded, **kwargs_expanded)
-    return samples
+    return sample_func(*args_expanded, **kwargs_expanded)

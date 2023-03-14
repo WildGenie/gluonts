@@ -121,9 +121,7 @@ class TSFReader:
     def _read_header(self, lines):
         for line in lines:
             assert line.startswith("@")
-            stop = self._tag(line[1:])
-
-            if stop:
+            if stop := self._tag(line[1:]):
                 return True
 
         return False
@@ -147,9 +145,7 @@ class TSFReader:
 
         *attributes, target = parts
 
-        record = {}
-
-        record[self.target_name] = self._data_target(target)
+        record = {self.target_name: self._data_target(target)}
 
         for (column, ty), attr in zip(self.meta.columns.items(), attributes):
             record[column] = parse_attribute(ty, attr)

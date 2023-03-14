@@ -66,12 +66,11 @@ def iter_paths(roots: List[str]) -> Iterator[Path]:
     for root in map(Path, roots):
         if root.is_file():
             yield root
-        else:
-            if not (root / ".no-license-check").exists():
-                yield from root.glob("*.py")
-                yield from iter_paths(
-                    subpath for subpath in root.iterdir() if subpath.is_dir()
-                )
+        elif not (root / ".no-license-check").exists():
+            yield from root.glob("*.py")
+            yield from iter_paths(
+                subpath for subpath in root.iterdir() if subpath.is_dir()
+            )
 
 
 @click.group()

@@ -192,13 +192,11 @@ class PiecewiseLinear(Distribution):
             + 2 * max_a_tilde_knots * knot_positions
         )
 
-        crps = (
+        return (
             (2 * a_tilde - 1) * x
             + (1 - 2 * a_tilde) * gamma
             + F.sum(b * coeff, axis=-1, keepdims=False)
         )
-
-        return crps
 
     def cdf(self, x: Tensor) -> Tensor:
         r"""
@@ -314,11 +312,9 @@ class PiecewiseLinear(Distribution):
             x.expand_dims(axis=-1), knot_positions
         )
 
-        quantile = F.broadcast_add(
+        return F.broadcast_add(
             gamma, F.sum(F.broadcast_mul(b, F.relu(x_minus_knots)), axis=-1)
         )
-
-        return quantile
 
     @property
     def batch_shape(self) -> Tuple:
@@ -368,11 +364,10 @@ class PiecewiseLinearOutput(DistributionOutput):
     ) -> PiecewiseLinear:
         if scale is None:
             return self.distr_cls(*distr_args)
-        else:
-            distr = self.distr_cls(*distr_args)
-            return TransformedPiecewiseLinear(
-                distr, [AffineTransformation(loc=loc, scale=scale)]
-            )
+        distr = self.distr_cls(*distr_args)
+        return TransformedPiecewiseLinear(
+            distr, [AffineTransformation(loc=loc, scale=scale)]
+        )
 
     @property
     def event_shape(self) -> Tuple:
@@ -425,7 +420,7 @@ class FixedKnotsPiecewiseLinearOutput(PiecewiseLinearOutput):
         quantile_levels: Union[List[float], np.ndarray],
     ) -> None:
         assert all(
-            [0 < q < 1 for q in quantile_levels]
+            0 < q < 1 for q in quantile_levels
         ), "Quantiles must be strictly between 0 and 1."
 
         assert np.all(np.diff(quantile_levels) > 0), (

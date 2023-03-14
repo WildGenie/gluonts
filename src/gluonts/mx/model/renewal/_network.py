@@ -102,14 +102,12 @@ class DeepRenewalNetwork(gluon.HybridBlock):
         )
 
         return tuple(
-            (
-                do.distribution(mean)
-                if len(do.args_dim) == 1
-                else do.distribution(
-                    [mean, F.Activation(alpha_bias, "softrelu") + 1e-5]
-                )
+            do.distribution(mean)
+            if len(do.args_dim) == 1
+            else do.distribution(
+                [mean, F.Activation(alpha_bias, "softrelu") + 1e-5]
             )
-            for ix, (do, mean, alpha_bias) in enumerate(distr_params)
+            for do, mean, alpha_bias in distr_params
         )
 
     @staticmethod
@@ -226,9 +224,7 @@ class DeepRenewalTrainingNetwork(DeepRenewalNetwork):
             use_sequence_length=True,
             axis=1,
         )
-        loss = -F.where(1 - mask, log_prob, F.zeros_like(log_prob))
-
-        return loss
+        return -F.where(1 - mask, log_prob, F.zeros_like(log_prob))
 
 
 class DeepRenewalPredictionNetwork(DeepRenewalNetwork):
@@ -300,7 +296,7 @@ class DeepRenewalPredictionNetwork(DeepRenewalNetwork):
             # we achieve this via (leaky) rejection sampling
             if t == 0:
                 interval_sample = F.zeros_like(repeated_time_remaining)
-                for j in range(50):
+                for _ in range(50):
                     interval_sample = F.where(
                         interval_sample > repeated_time_remaining,
                         interval_sample,

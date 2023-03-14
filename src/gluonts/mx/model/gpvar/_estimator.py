@@ -284,7 +284,7 @@ class GPVAREstimator(GluonEstimator):
         )
 
     def _create_instance_splitter(self, mode: str):
-        assert mode in ["training", "validation", "test"]
+        assert mode in {"training", "validation", "test"}
 
         instance_sampler = {
             "training": self.train_sampler,
@@ -327,7 +327,7 @@ class GPVAREstimator(GluonEstimator):
             )
             + SampleTargetDim(
                 field_name=FieldName.TARGET_DIM_INDICATOR,
-                target_field=FieldName.TARGET + "_cdf",
+                target_field=f"{FieldName.TARGET}_cdf",
                 observed_values_field=FieldName.OBSERVED_VALUES,
                 num_samples=self.target_dim_sample,
                 shuffle=self.shuffle_target_dim,

@@ -62,17 +62,13 @@ class LogitNormal(Distribution):
         F = self.F
         x_clip = 1e-3
         x = F.clip(x, x_clip, 1 - x_clip)
-        log_prob = -1.0 * (
+        return -1.0 * (
             F.log(self.sigma)
             + F.log(F.sqrt(2 * F.full(1, np.pi)))
             + F.log(x)
             + F.log(1 - x)
-            + (
-                (F.log(x) - F.log(1 - x) - self.mu) ** 2
-                / (2 * (self.sigma**2))
-            )
+            + ((F.log(x) - F.log(1 - x) - self.mu) ** 2 / (2 * (self.sigma**2)))
         )
-        return log_prob
 
     def sample(self, num_samples=None, dtype=np.float32):
         def s(mu):

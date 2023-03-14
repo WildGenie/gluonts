@@ -32,10 +32,9 @@ def group_exchangerate_cv(
 ):
     dataset = get_dataset("exchange_rate")
     len_sample = context_length + prediction_length
-    dataset_group = [[] for i in range(num_groups)]
+    dataset_group = [[] for _ in range(num_groups)]
     train_full_data = []
     test_full_data = []
-    ret = dict()
     train_it = iter(dataset.train)
     test_it = iter(dataset.test)
     # num_ts = int(dataset.metadata.feat_static_cat[0].cardinality)
@@ -74,7 +73,7 @@ def group_exchangerate_cv(
             )
             unsplit_start += pd.Timedelta("1D") * prediction_length
     # get ready the test data
-    for i in range(int(num_ts * 0.2)):
+    for _ in range(int(num_ts * 0.2)):
         test_entry = next(test_it)
         unsplit_ts = test_entry["target"]
         unsplit_start = test_entry["start"]
@@ -92,7 +91,7 @@ def group_exchangerate_cv(
                 }
             )
     print("total number of training examples: ", len(train_full_data))
-    ret["group_ratio"] = [len(i) / len(train_full_data) for i in dataset_group]
+    ret = {"group_ratio": [len(i) / len(train_full_data) for i in dataset_group]}
     print("ratio for each group: ", ret["group_ratio"])
     random.shuffle(train_full_data)
     ret["whole_data"] = ListDataset(

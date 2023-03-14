@@ -238,9 +238,7 @@ class PreprocessGeneric:
                     target_data += list(ts_target_data)
 
         logging.info(
-            "Done preprocessing. Resulting number of datapoints is: {}".format(
-                len(feature_data)
-            )
+            f"Done preprocessing. Resulting number of datapoints is: {len(feature_data)}"
         )
         if change_internal_variables:
             self.feature_data, self.target_data = feature_data, target_data
@@ -446,10 +444,7 @@ class PreprocessOnlyLagFeatures(PreprocessGeneric):
         list
         """
         end_index = starting_index + self.context_window_size
-        if starting_index < 0:
-            prefix = [None] * abs(starting_index)
-        else:
-            prefix = []
+        prefix = [None] * abs(starting_index) if starting_index < 0 else []
         time_series_window = time_series["target"][starting_index:end_index]
         only_lag_features, transform_dict = self._pre_transform(
             time_series_window, self.subtract_mean, self.count_nans

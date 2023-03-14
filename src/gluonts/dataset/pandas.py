@@ -305,10 +305,7 @@ def infer_freq(index: pd.Index) -> str:
     # pandas likes to infer the `start of x` frequency, however when doing
     # df.to_period("<x>S"), it fails, so we avoid using it. It's enough to
     # remove the trailing S, e.g `MS` -> `M
-    if len(freq) > 1 and freq.endswith("S"):
-        return freq[:-1]
-
-    return freq
+    return freq[:-1] if len(freq) > 1 and freq.endswith("S") else freq
 
 
 def is_uniform(index: pd.PeriodIndex) -> bool:

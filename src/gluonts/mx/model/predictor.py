@@ -176,12 +176,13 @@ class GluonPredictor(Predictor):
             return False
         if not equals(self.lead_time, that.lead_time):
             return False
-        if not equals(self.input_transform, that.input_transform):
-            return False
-
-        return equals(
-            self.prediction_net.collect_params(),
-            that.prediction_net.collect_params(),
+        return (
+            equals(
+                self.prediction_net.collect_params(),
+                that.prediction_net.collect_params(),
+            )
+            if equals(self.input_transform, that.input_transform)
+            else False
         )
 
     def serialize(self, path: Path) -> None:

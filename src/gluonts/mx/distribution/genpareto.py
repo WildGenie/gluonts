@@ -102,8 +102,7 @@ class GenPareto(Distribution):
     def cdf(self, x: Tensor) -> Tensor:
         F = self.F
         x_shifted = F.broadcast_div(x, self.beta)
-        u = 1 - F.power(1 + self.xi * x_shifted, -F.reciprocal(self.xi))
-        return u
+        return 1 - F.power(1 + self.xi * x_shifted, -F.reciprocal(self.xi))
 
     def quantile(self, level: Tensor):
         F = self.F
@@ -113,8 +112,7 @@ class GenPareto(Distribution):
             level = level.expand_dims(axis=-1)
 
         x_shifted = F.broadcast_div(F.power(1 - level, -self.xi) - 1, self.xi)
-        x = F.broadcast_mul(x_shifted, self.beta)
-        return x
+        return F.broadcast_mul(x_shifted, self.beta)
 
     @property
     def mean(self) -> Tensor:

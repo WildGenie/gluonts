@@ -31,9 +31,8 @@ def get_m4_by_freq(
     num_groups=6,
     file_name="m4_freq",
 ):
-    dataset_group = [[] for i in range(num_groups)]
+    dataset_group = [[] for _ in range(num_groups)]
     whole_data = []
-    ret = dict()
     datasets_name = [
         "m4_hourly",
         "m4_daily",
@@ -54,7 +53,7 @@ def get_m4_by_freq(
         dataset = get_dataset(datasets_name[i])
         len_sample = context_length + prediction_length
         it = iter(dataset.train)
-        for j in range(num_ts):
+        for _ in range(num_ts):
             train_entry = next(it)
             unsplit_ts = train_entry["target"]
             # unsplit_start = train_entry['start']
@@ -91,7 +90,7 @@ def get_m4_by_freq(
     #    print(len(dataset_group[i]))
     # import pdb;pdb.set_trace()
     print(len(whole_data))
-    ret["group_ratio"] = [len(i) / len(whole_data) for i in dataset_group]
+    ret = {"group_ratio": [len(i) / len(whole_data) for i in dataset_group]}
     print(ret["group_ratio"])
     random.shuffle(whole_data)
     ret["whole_data"] = ListDataset(whole_data, freq=dataset.metadata.freq)
@@ -124,9 +123,8 @@ def get_temperature_data(
         "Haifa",
     ]
     datetime = ts_file["datetime"]
-    dataset_group = [[] for i in range(num_groups)]
+    dataset_group = [[] for _ in range(num_groups)]
     whole_data = []
-    ret = dict()
     for gid in range(num_groups):
         ts = ts_file[city_names[gid]]
         num_samples = 0
@@ -155,7 +153,7 @@ def get_temperature_data(
             if num_samples == samples_per_ts:
                 break
     random.shuffle(whole_data)
-    ret["whole_data"] = ListDataset(whole_data, freq="1H")
+    ret = {"whole_data": ListDataset(whole_data, freq="1H")}
     group_data_list = []
     for group in dataset_group:
         random.shuffle(group)
@@ -172,13 +170,12 @@ def get_temperature_data(
 
 def get_amazon_sales():
     f = open("./dataset/sgc_train.json", encoding="utf-8")
-    dataset_group = [[] for i in range(8)]
+    dataset_group = [[] for _ in range(8)]
     whole_data = []
-    ret = dict()
     X = []
     Y = []
     # split_grid = [0.04, 0.1, 0.25, 0.5, 1, 10, 100, 5000]
-    for line in f.readlines():
+    for line in f:
         # gid = 0
         dic = json.loads(line)
         var = torch.var(torch.FloatTensor(dic["target"])).item()
@@ -193,13 +190,13 @@ def get_amazon_sales():
         X.append((ts, var))
     X = sorted(X, key=lambda x: x[1])
     X = [x[0] for x in X]
-    length = int(len(X) / 8)
+    length = len(X) // 8
     for gid in range(8):
         for j in range(gid * length, (gid + 1) * length):
             whole_data.append({"target": X[j], "start": start})
             dataset_group[gid].append({"target": X[j], "start": start})
     random.shuffle(whole_data)
-    ret["whole_data"] = ListDataset(whole_data, freq="1H")
+    ret = {"whole_data": ListDataset(whole_data, freq="1H")}
     group_list = []
     for group in dataset_group:
         random.shuffle(group)
@@ -216,19 +213,18 @@ def get_amazon_sales():
 
 def get_group_data_by_var(name, num_groups, len_sample=9):
     dataset = get_dataset(name)
-    dataset_group = [[] for i in range(num_groups)]
+    dataset_group = [[] for _ in range(num_groups)]
     whole_data = []
-    ret = []
     it = iter(dataset.train)
     num_ts = int(dataset.metadata.feat_static_cat[0].cardinality)
     group_boundary = [1e3, 5e3, 1e4, 5e4, 1e5, 5e5]
-    for i in range(num_ts):
+    group_id = 0
+    for _ in range(num_ts):
         train_entry = next(it)
-        unsplit_ts = train_entry["target"][0:800]
+        unsplit_ts = train_entry["target"][:800]
         unsplit_start = train_entry["start"]
         whole_data.append({"target": unsplit_ts, "start": unsplit_start})
         for ts_sample_start in range(len(unsplit_ts) - len_sample):
-            group_id = 0
             print(
                 torch.var(
                     torch.FloatTensor(
@@ -238,22 +234,12 @@ def get_group_data_by_var(name, num_groups, len_sample=9):
                     )
                 )
             )
-            continue
-            dataset_group[group_id].append(
-                {
-                    "target": unsplit_ts[
-                        ts_sample_start : ts_sample_start + len_sample
-                    ],
-                    "start": unsplit_start,
-                }
-            )
-            unsplit_start += pd.Timedelta(hours=1)
     import pdb
 
     pdb.set_trace()
     random.shuffle(whole_data)
     print("append once")
-    ret.append(ListDataset(whole_data, freq=dataset.metadata.freq))
+    ret = [ListDataset(whole_data, freq=dataset.metadata.freq)]
     print("append twice")
     ret.append(ListDataset(whole_data, freq=dataset.metadata.freq))
     print("append data")
@@ -262,7 +248,7 @@ def get_group_data_by_var(name, num_groups, len_sample=9):
         ret.append(ListDataset(group, freq=dataset.metadata.freq))
     print("write whole data")
     with open("synthetic_traffic_time_whole_data.csv", "wb") as output:
-        pickle.dump(ret[0:2], output)
+        pickle.dump(ret[:2], output)
     print("write group data")
     with open("synthetic_traffic_time_group_data.csv", "wb") as output:
         pickle.dump(ret, output)
@@ -271,9 +257,8 @@ def get_group_data_by_var(name, num_groups, len_sample=9):
 
 def get_group_data_by_hash(name, q, num_groups):
     dataset = get_dataset(name)
-    dataset_group = [[] for i in range(num_groups)]
+    dataset_group = [[] for _ in range(num_groups)]
     whole_data = []
-    ret = []
     it = iter(dataset.train)
     num_ts = int(dataset.metadata.feat_static_cat[0].cardinality)
     for i in range(num_ts):
@@ -285,18 +270,19 @@ def get_group_data_by_hash(name, q, num_groups):
             {"target": train_entry["target"], "start": train_entry["start"]}
         )
     random.shuffle(whole_data)
-    ret.append(ListDataset(whole_data, freq=dataset.metadata.freq))
-    for group in dataset_group:
-        ret.append(ListDataset(group, freq=dataset.metadata.freq))
+    ret = [ListDataset(whole_data, freq=dataset.metadata.freq)]
+    ret.extend(
+        ListDataset(group, freq=dataset.metadata.freq)
+        for group in dataset_group
+    )
     return ret, dataset.metadata.freq
 
 
 def get_group_data_by_duplicate(name, num_duplicates, num_groups):
     dataset = get_dataset(name)
-    dataset_group = [[] for i in range(num_groups)]
+    dataset_group = [[] for _ in range(num_groups)]
     whole_data_list = []
     no_duplicate_whole_data_list = []
-    ret = []
     it = iter(dataset.train)
     num_ts = int(dataset.metadata.feat_static_cat[0].cardinality)
     for i in range(num_ts):
@@ -304,7 +290,7 @@ def get_group_data_by_duplicate(name, num_duplicates, num_groups):
         no_duplicate_whole_data_list.append(
             {"target": train_entry["target"], "start": train_entry["start"]}
         )
-        for j in range(num_duplicates):
+        for _ in range(num_duplicates):
             dataset_group[i % num_groups].append(
                 {
                     "target": train_entry["target"],
@@ -319,10 +305,10 @@ def get_group_data_by_duplicate(name, num_duplicates, num_groups):
             )
     random.shuffle(whole_data_list)
     random.shuffle(no_duplicate_whole_data_list)
-    ret.append(
-        ListDataset(no_duplicate_whole_data_list, freq=dataset.metadata.freq)
-    )
-    ret.append(ListDataset(whole_data_list, freq=dataset.metadata.freq))
+    ret = [
+        ListDataset(no_duplicate_whole_data_list, freq=dataset.metadata.freq),
+        ListDataset(whole_data_list, freq=dataset.metadata.freq),
+    ]
     for group in dataset_group:
         random.shuffle(group)
         ret.append(ListDataset(group, freq=dataset.metadata.freq))
@@ -332,28 +318,27 @@ def get_group_data_by_duplicate(name, num_duplicates, num_groups):
 def get_whole_data_by_duplicate(name, num_duplicates):
     dataset = get_dataset(name)
     dataset_group = []
-    ret = []
     no_duplicate_whole_data_list = []
     it = iter(dataset.train)
     num_ts = int(dataset.metadata.feat_static_cat[0].cardinality)
-    for i in range(num_ts):
+    for _ in range(num_ts):
         train_entry = next(it)
         no_duplicate_whole_data_list.append(
             {"target": train_entry["target"], "start": train_entry["start"]}
         )
-        for j in range(num_duplicates):
-            dataset_group.append(
-                {
-                    "target": train_entry["target"],
-                    "start": train_entry["start"],
-                }
-            )
+        dataset_group.extend(
+            {
+                "target": train_entry["target"],
+                "start": train_entry["start"],
+            }
+            for _ in range(num_duplicates)
+        )
     random.shuffle(dataset_group)
     random.shuffle(no_duplicate_whole_data_list)
-    ret.append(
-        ListDataset(no_duplicate_whole_data_list, freq=dataset.metadata.freq)
-    )
-    ret.append(ListDataset(dataset_group, freq=dataset.metadata.freq))
+    ret = [
+        ListDataset(no_duplicate_whole_data_list, freq=dataset.metadata.freq),
+        ListDataset(dataset_group, freq=dataset.metadata.freq),
+    ]
     return ret, dataset.metadata.freq
 
 
@@ -362,7 +347,7 @@ def get_group_data(name):
     dataset_group = []
     it = iter(dataset.train)
     num_ts = int(dataset.metadata.feat_static_cat[0].cardinality)
-    for i in range(num_ts):
+    for _ in range(num_ts):
         train_entry = next(it)
         dataset_group.append(
             ListDataset(
@@ -383,7 +368,7 @@ def get_whole_data(name):
     dataset_group = []
     it = iter(dataset.train)
     num_ts = int(dataset.metadata.feat_static_cat[0].cardinality)
-    for i in range(num_ts):
+    for _ in range(num_ts):
         train_entry = next(it)
         dataset_group.append(
             {"target": train_entry["target"], "start": train_entry["start"]}
@@ -413,7 +398,7 @@ def get_synthetic_data(model_name=None, num_groups=8, mean_boundary=1):
         for p in net.parameters():
             p.data = torch.normal(parameter_mean, 0.1, size=p.data.shape)
         ts = torch.normal(0, 0.1, size=(1, context_length))
-        for num_ts in range(num_time_steps):
+        for _ in range(num_time_steps):
             ts_slice = torch.Tensor(ts[0][-context_length:]).view(
                 1, context_length
             )
@@ -463,7 +448,7 @@ def get_synthetic_data_mlp(
     dataset_group = []
     whole_data_list = []
     start = pd.Timestamp("01-01-2019", freq="1H")
-    for gid in range(num_groups):
+    for _ in range(num_groups):
         net = SimpleFeedForwardEstimator(
             freq="1H",
             prediction_length=prediction_length,
@@ -487,7 +472,7 @@ def get_synthetic_data_mlp(
         ts = ts.view(
             len(ts[0]),
         )  # [context_length:]
-        for j in range(num_duplicates):
+        for _ in range(num_duplicates):
             ts_sample = ts + torch.normal(0, 0.1, size=ts.shape)
             whole_data_list.append({"target": ts_sample, "start": start})
             pattern_group.append({"target": ts_sample, "start": start})
@@ -495,9 +480,7 @@ def get_synthetic_data_mlp(
     random.shuffle(whole_data_list)
     random.shuffle(dataset_group)
     dataset = ListDataset(whole_data_list, freq="1H")
-    ret = []
-    ret.append(dataset)
-    ret.append(dataset)
+    ret = [dataset, dataset]
     dataset_group = [dataset] + dataset_group
     dataset_group = [dataset] + dataset_group
 
@@ -523,9 +506,8 @@ def get_synthetic_data_linear(
 
     dataset_group = []
     whole_data = []
-    ret = dict()
     start = pd.Timestamp("01-01-2000", freq=freq)
-    for gid in range(num_groups):
+    for _ in range(num_groups):
         model1 = torch.nn.Linear(context_length, prediction_length)
         model2 = torch.nn.Linear(context_length, prediction_length)
         # model1 = torch.sin
@@ -536,21 +518,22 @@ def get_synthetic_data_linear(
         for t_step in range(2 * steps_per_ts):
             while True:
                 with torch.no_grad():
-                    if t_step <= steps_per_ts:
-                        prediction = model1(sample_context)
-                    else:
-                        prediction = model2(sample_context)
+                    prediction = (
+                        model1(sample_context)
+                        if t_step <= steps_per_ts
+                        else model2(sample_context)
+                    )
                     if (
                         torch.norm(prediction) < prediction_length
                     ):  # and prediction_length*0.1 < torch.norm(prediction):
                         # prediction = torch.sin(prediction)
                         # prediction /= torch.max(prediction)
                         break
-                    # prediction *= 10
-                    # prediction += torch.normal(0, 0.1, size=prediction.shape)
+                                    # prediction *= 10
+                                    # prediction += torch.normal(0, 0.1, size=prediction.shape)
             ts_sample = torch.cat([sample_context, prediction])
             # print(ts_sample)
-            for j in range(num_duplicates):
+            for _ in range(num_duplicates):
                 ts_sample += torch.normal(0, 0.1, size=ts_sample.shape)
                 whole_data.append({"target": ts_sample, "start": start})
                 if t_step <= steps_per_ts:
@@ -573,7 +556,7 @@ def get_synthetic_data_linear(
         )
         """
     print(len(whole_data))
-    ret["group_ratio"] = [len(i) / len(whole_data) for i in dataset_group]
+    ret = {"group_ratio": [len(i) / len(whole_data) for i in dataset_group]}
     print(ret["group_ratio"])
     random.shuffle(whole_data)
     ret["whole_data"] = ListDataset(whole_data, freq=freq)
@@ -606,7 +589,7 @@ def get_synthetic_data_linear_simple(
             * mean_boundary
             * torch.FloatTensor(base).view(1, num_time_steps)
         )
-        for j in range(num_duplicates):
+        for _ in range(num_duplicates):
             ts += torch.normal(0, 0.01, size=ts.shape)
             whole_data_list.append(
                 {
@@ -666,7 +649,7 @@ def get_synthetic_data_sin(
                 "start": start,
             }
         )
-        for j in range(num_duplicates):
+        for _ in range(num_duplicates):
             ts += torch.normal(0, 0.1, size=ts.shape)
             whole_data_list.append(
                 {
@@ -688,11 +671,9 @@ def get_synthetic_data_sin(
 
     random.shuffle(whole_data_list)
     random.shuffle(no_duplicate_whole_data_list)
-    ret_whole_dataset = []
     dataset = ListDataset(whole_data_list, freq="1D")
     no_duplicate_dataset = ListDataset(no_duplicate_whole_data_list, freq="1D")
-    ret_whole_dataset.append(dataset)
-    ret_whole_dataset.append(dataset)
+    ret_whole_dataset = [dataset, dataset]
     dataset_group = [dataset] + dataset_group
     dataset_group = [dataset] + dataset_group
 

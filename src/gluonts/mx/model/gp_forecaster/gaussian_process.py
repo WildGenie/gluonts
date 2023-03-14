@@ -97,7 +97,7 @@ class GaussianProcess:
             context_length if context_length is not None else prediction_length
         )
         self.num_samples = num_samples
-        self.F = F if F else getF(sigma)
+        self.F = F or getF(sigma)
         self.float_type = float_type
         self.jitter_method = jitter_method
         self.max_iter_jitter = max_iter_jitter

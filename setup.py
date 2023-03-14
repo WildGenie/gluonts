@@ -25,9 +25,7 @@ ROOT = Path(__file__).parent
 
 
 def get_version_cmdclass(version_file):
-    with open(version_file) as fobj:
-        code = fobj.read()
-
+    code = Path(version_file).read_text()
     globals_ = {"__file__": str(version_file)}
     exec(code, globals_)
 

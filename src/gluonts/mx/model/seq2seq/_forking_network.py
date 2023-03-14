@@ -97,11 +97,7 @@ class ForkingSeq2SeqNetworkBase(gluon.HybridBlock):
             num_forking if num_forking is not None else context_length
         )
 
-        if self.scaling:
-            self.scaler = MeanScaler()
-        else:
-            self.scaler = NOPScaler()
-
+        self.scaler = MeanScaler() if self.scaling else NOPScaler()
         if self.scaling_decoder_dynamic_feature:
             self.scaler_decoder_dynamic_feature = MeanScaler(axis=1)
         else:
@@ -270,13 +266,9 @@ class ForkingSeq2SeqTrainingNetwork(ForkingSeq2SeqNetworkBase):
             )
             loss = distr.loss(future_target)
 
-        # mask the loss based on observed indicator
-        # shape: (batch_size, decoder_length)
-        weighted_loss = weighted_average(
+        return weighted_average(
             F=F, x=loss, weights=future_observed_values, axis=1
         )
-
-        return weighted_loss
 
 
 class ForkingSeq2SeqPredictionNetwork(ForkingSeq2SeqNetworkBase):

@@ -99,7 +99,7 @@ class QuantileLoss(Loss):
         batch_axis
             indicates axis that represents the batch.
         """
-        assert len(quantiles) > 0
+        assert quantiles
 
         super().__init__(weight, batch_axis, **kwargs)
 
@@ -141,20 +141,17 @@ class QuantileLoss(Loss):
         else:
             y_pred_all = [F.squeeze(y_pred, axis=-1)]
 
-        qt_loss = []
-        for level, weight, y_pred_q in zip(
-            self.quantiles, self.quantile_weights, y_pred_all
-        ):
-            qt_loss.append(
-                weight * self.compute_quantile_loss(F, y_true, y_pred_q, level)
+        qt_loss = [
+            weight * self.compute_quantile_loss(F, y_true, y_pred_q, level)
+            for level, weight, y_pred_q in zip(
+                self.quantiles, self.quantile_weights, y_pred_all
             )
+        ]
         stacked_qt_losses = F.stack(*qt_loss, axis=-1)
         sum_qt_loss = F.mean(
             stacked_qt_losses, axis=-1
         )  # avg across quantiles
-        if sample_weight is not None:
-            return sample_weight * sum_qt_loss
-        return sum_qt_loss
+        return sum_qt_loss if sample_weight is None else sample_weight * sum_qt_loss
 
     @staticmethod
     def compute_quantile_loss(
@@ -184,9 +181,7 @@ class QuantileLoss(Loss):
         under_bias = p * F.maximum(y_true - y_pred_p, 0)
         over_bias = (1 - p) * F.maximum(y_pred_p - y_true, 0)
 
-        qt_loss = 2 * (under_bias + over_bias)
-
-        return qt_loss
+        return 2 * (under_bias + over_bias)
 
 
 class QuantileOutput:

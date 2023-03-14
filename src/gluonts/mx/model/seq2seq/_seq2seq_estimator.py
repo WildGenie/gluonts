@@ -149,7 +149,7 @@ class Seq2SeqEstimator(GluonEstimator):
         )
 
     def _create_instance_splitter(self, mode: str):
-        assert mode in ["training", "validation", "test"]
+        assert mode in {"training", "validation", "test"}
 
         instance_sampler = {
             "training": self.train_sampler,
@@ -207,7 +207,7 @@ class Seq2SeqEstimator(GluonEstimator):
             static_outputs_per_time_step=self.decoder_mlp_static_dim,
         )
 
-        training_network = Seq2SeqTrainingNetwork(
+        return Seq2SeqTrainingNetwork(
             embedder=self.embedder,
             scaler=self.scaler,
             encoder=self.encoder,
@@ -215,8 +215,6 @@ class Seq2SeqEstimator(GluonEstimator):
             decoder=decoder,
             quantile_output=distribution,
         )
-
-        return training_network
 
     def create_predictor(
         self,

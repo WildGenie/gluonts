@@ -195,9 +195,5 @@ class ResidualSequential(gluon.nn.HybridSequential):
         for i, block in enumerate(self._children.values()):
             out = block(x)
             outs.append(out)
-            if i == 0:
-                x = out
-            else:
-                x = x + out
-
+            x = out if i == 0 else x + out
         return sum(outs)

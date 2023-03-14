@@ -194,5 +194,4 @@ class OneShotDecoder(Seq2SeqDecoder):
         )
         combined_input = F.concat(dynamic_input, static_input_tile, dim=2)
 
-        out = self.mlp(combined_input)  # (N, T, layer_sizes[-1])
-        return out
+        return self.mlp(combined_input)

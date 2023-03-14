@@ -139,9 +139,7 @@ class DirichletMultinomial(Distribution):
 
         diagonal = make_nd_diag(F, F.broadcast_div(scaled_alpha, scale), d)
 
-        dir_variance = diagonal - cross
-
-        return dir_variance
+        return diagonal - cross
 
     def sample(
         self, num_samples: Optional[int] = None, dtype=np.float32
@@ -180,13 +178,10 @@ class DirichletMultinomialOutput(DistributionOutput):
         self.mask = None
 
     def distribution(self, distr_args, loc=None, scale=None) -> Distribution:
-        distr = DirichletMultinomial(self.dim, self.n_trials, distr_args)
-        return distr
+        return DirichletMultinomial(self.dim, self.n_trials, distr_args)
 
     def domain_map(self, F, alpha_vector):
-        # apply softplus to the elements of alpha vector
-        alpha = F.Activation(alpha_vector, act_type="softrelu")
-        return alpha
+        return F.Activation(alpha_vector, act_type="softrelu")
 
     @property
     def event_shape(self) -> Tuple:

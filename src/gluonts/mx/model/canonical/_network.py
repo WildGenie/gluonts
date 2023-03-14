@@ -61,9 +61,7 @@ class CanonicalNetworkBase(HybridBlock):
             helper_ones, F.expand_dims(embedded_cat, axis=1)
         )
 
-        # putting together all the features
-        input_feat = F.concat(repeated_cat, time_feat, dim=2)
-        return input_feat
+        return F.concat(repeated_cat, time_feat, dim=2)
 
     def hybrid_forward(self, F, x, *args, **kwargs):
         raise NotImplementedError

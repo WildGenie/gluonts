@@ -432,18 +432,17 @@ def weighted_average(
     Tensor:
         The tensor with values averaged along the specified `axis`.
     """
-    if weights is not None:
-        weighted_tensor = F.where(
-            condition=weights, x=x * weights, y=F.zeros_like(x)
-        )
-        if include_zeros_in_denominator:
-            sum_weights = F.maximum(1.0, F.ones_like(weights).sum(axis=axis))
-        else:
-            sum_weights = F.maximum(1.0, weights.sum(axis=axis))
-
-        return weighted_tensor.sum(axis=axis) / sum_weights
-    else:
+    if weights is None:
         return x.mean(axis=axis)
+    weighted_tensor = F.where(
+        condition=weights, x=x * weights, y=F.zeros_like(x)
+    )
+    sum_weights = (
+        F.maximum(1.0, F.ones_like(weights).sum(axis=axis))
+        if include_zeros_in_denominator
+        else F.maximum(1.0, weights.sum(axis=axis))
+    )
+    return weighted_tensor.sum(axis=axis) / sum_weights
 
 
 def make_nd_diag(F, x: Tensor, d: int) -> Tensor:

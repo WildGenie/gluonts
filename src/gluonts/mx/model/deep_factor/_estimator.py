@@ -132,7 +132,7 @@ class DeepFactorEstimator(GluonEstimator):
             num_layers_local > 0
         ), "The value of `num_layers_local` should be > 0"
         assert all(
-            [c > 0 for c in cardinality]
+            c > 0 for c in cardinality
         ), "Elements of `cardinality` should be > 0"
         assert (
             embedding_dimension > 0

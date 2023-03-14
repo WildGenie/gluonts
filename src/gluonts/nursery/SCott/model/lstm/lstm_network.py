@@ -61,8 +61,7 @@ class LSTMTrainingNetwork(LSTMNetworkBase):
         lstm_out, _ = self.lstm(inputs)
         prediction = self.linear(lstm_out)
 
-        loss = self.criterion(prediction[-1], future_target)
-        return loss
+        return self.criterion(prediction[-1], future_target)
 
 
 class LSTMPredictionNetwork(LSTMNetworkBase):

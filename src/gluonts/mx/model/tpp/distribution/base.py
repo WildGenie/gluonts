@@ -216,8 +216,7 @@ class TPPDistributionOutput(DistributionOutput):
             )
         if scale is None:
             return self.distr_cls(*distr_args)
-        else:
-            distr = self.distr_cls(*distr_args)
-            return TPPTransformedDistribution(
-                distr, [AffineTransformation(scale=scale)]
-            )
+        distr = self.distr_cls(*distr_args)
+        return TPPTransformedDistribution(
+            distr, [AffineTransformation(scale=scale)]
+        )

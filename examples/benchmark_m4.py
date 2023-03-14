@@ -91,7 +91,7 @@ if __name__ == "__main__":
             try:
                 results.append(evaluate(dataset_name, estimator))
             except Exception as e:
-                print(str(e))
+                print(e)
 
     df = pd.DataFrame(results)
 
